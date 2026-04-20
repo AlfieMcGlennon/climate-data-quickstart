@@ -15,9 +15,19 @@ regular grid. "Single levels" refers to surface and near-surface variables
 (temperature at 2 m, wind at 10 m, precipitation, radiation, soil moisture,
 etc.) rather than variables on atmospheric pressure levels.
 
-Use it when you need a long, global, physically consistent record of weather
-at hourly resolution. Typical uses: climate baselines, forcing for land-surface
-models, validating regional models, bias-correcting projections.
+Use it when you need a long, global, physically consistent record of
+surface and near-surface variables. The native product is hourly, but the
+same data backs a wide range of temporal views: users routinely aggregate
+hourly to daily means, daily min or max, monthly or annual statistics, or
+compute custom indices (heatwave thresholds, frost days, growing degree
+days). The ERA5 daily statistics dataset in this repo is a pre-computed
+shortcut for the most common aggregates; everything else can be built from
+the hourly data with `xarray.resample()` or `xarray.groupby()`.
+
+Typical uses: climate baselines, forcing for land-surface and hydrological
+models, validating regional models, bias-correcting projections, building
+custom climate indices, and as the reference record for climate risk and
+exposure analysis.
 
 ## Coverage
 
@@ -47,29 +57,41 @@ below for the caveats that apply to pre-1959 analysis.
 ## Variables
 
 ERA5 single levels contains more than 250 variables. The ten most commonly
-used are listed below. The full categorised list is in
+used are listed below. The full categorised list with descriptions is in
 [variables.md](variables.md).
 
-| CDS API name | Long name | GRIB short name | Units |
-|---|---|---|---|
-| `2m_temperature` | 2 metre temperature | `2t` | K |
-| `2m_dewpoint_temperature` | 2 metre dewpoint temperature | `2d` | K |
-| `10m_u_component_of_wind` | 10 metre U wind component | `10u` | m s-1 |
-| `10m_v_component_of_wind` | 10 metre V wind component | `10v` | m s-1 |
-| `mean_sea_level_pressure` | Mean sea level pressure | `msl` | Pa |
-| `surface_pressure` | Surface pressure | `sp` | Pa |
-| `total_precipitation` | Total precipitation | `tp` | m |
-| `sea_surface_temperature` | Sea surface temperature | `sst` | K |
-| `surface_solar_radiation_downwards` | Surface solar radiation downwards | `ssrd` | J m-2 |
-| `total_cloud_cover` | Total cloud cover | `tcc` | 0-1 |
+| CDS API name | Long name | GRIB short name | NetCDF name | Units |
+|---|---|---|---|---|
+| `2m_temperature` | 2 metre temperature | `2t` | `t2m` | K |
+| `2m_dewpoint_temperature` | 2 metre dewpoint temperature | `2d` | `d2m` | K |
+| `10m_u_component_of_wind` | 10 metre U wind component | `10u` | `u10` | m s-1 |
+| `10m_v_component_of_wind` | 10 metre V wind component | `10v` | `v10` | m s-1 |
+| `mean_sea_level_pressure` | Mean sea level pressure | `msl` | `msl` | Pa |
+| `surface_pressure` | Surface pressure | `sp` | `sp` | Pa |
+| `total_precipitation` | Total precipitation | `tp` | `tp` | m |
+| `sea_surface_temperature` | Sea surface temperature | `sst` | `sst` | K |
+| `surface_solar_radiation_downwards` | Surface solar radiation downwards | `ssrd` | `ssrd` | J m-2 |
+| `total_cloud_cover` | Total cloud cover | `tcc` | `tcc` | 0-1 |
 
 ### Naming quirk
 
-The CDS API accepts human-readable snake_case names (`2m_temperature`) but the
-underlying GRIB records use short names (`2t`). When opening a downloaded file
-with `xarray` or `cfgrib`, variables appear under the short names, not the
-request names. This repo uses CDS API names in scripts and short names when
-reading the file, and documents both.
+There are three names for every ERA5 variable and they are not
+interchangeable:
+
+- **CDS API name** (snake_case, e.g. `2m_temperature`) - what you pass to
+  `cdsapi.Client().retrieve()` in the `variable` list.
+- **GRIB short name** (e.g. `2t`) - the name stored inside GRIB records,
+  per the ECMWF parameter database. GRIB files opened with `cfgrib` use
+  these.
+- **NetCDF name** (e.g. `t2m`) - what appears as a data variable when the
+  CDS returns NetCDF. The rewrite from GRIB to NetCDF avoids leading digits
+  because CF conventions and some tools dislike them, so `2t` becomes
+  `t2m`, `10u` becomes `u10`, and so on. For names that do not start with a
+  digit (`msl`, `sp`, `tp`, `sst`, `tcc`), GRIB and NetCDF names match.
+
+This repo's scripts and notebooks request data by CDS API name and open it
+by NetCDF name, because that is the default `data_format` and the format
+most users start with.
 
 ## Access
 

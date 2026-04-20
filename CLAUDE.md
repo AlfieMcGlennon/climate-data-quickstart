@@ -119,14 +119,32 @@ Rules:
 ## Notebook standards
 
 Every notebook must be runnable top-to-bottom without modification after the user
-has edited the config block. Fixed six-cell structure:
+has edited the config block. The notebook is as much a teaching artefact as a
+working example, so narrative markdown sits between the code cells.
 
-1. **Config block** (code cell)
-2. **Imports with version check** (code cell) - imports + `print(xr.__version__)` style
-3. **Download** (code cell) - small test pull, 1 day, 1 variable, small region
-4. **Open with xarray** (code cell) - `ds = xr.open_dataset(...)`, print dataset summary
-5. **Basic plot** (code cell) - map or time series, whichever fits the dataset
-6. **Next steps** (markdown cell) - pointer to full docs, suggested extensions
+**Required code cells in order:**
+
+1. **Config block** - the same block that appears at the top of the download script
+2. **Imports with version check** - use
+   `from importlib.metadata import version` then
+   `print(f"cdsapi       {version('cdsapi')}")` for each package, because some
+   packages (cdsapi included) do not expose `__version__`
+3. **Download** - small test pull, 1 day, 1 variable, small region
+4. **Open with xarray** - `ds = xr.open_dataset(...)`, print dataset summary
+5. **Basic plot** - map or time series, whichever fits the dataset
+
+**Required markdown cells:**
+
+- **Intro** at the very top: what this notebook does, prerequisites
+  (registration, licence acceptance, credentials, `pip install`), link to the
+  full `docs/{dataset-slug}/README.md`
+- **One narrative cell before each code cell** (except the config block, which
+  is introduced by the intro): 1-3 sentences explaining what the cell does and
+  what to look for in the output. Short, direct, no filler.
+- **Next steps** at the end: pointer to full docs, suggested extensions, links
+  to related datasets in this repo
+
+Typical total: 5 code cells plus 5 to 6 markdown cells (around 10 to 11 cells).
 
 Plots must have labelled axes, units, and a colourbar label if they are maps.
 
