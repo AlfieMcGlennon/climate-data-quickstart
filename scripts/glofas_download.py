@@ -65,7 +65,7 @@ def download(
     variable: str = VARIABLE,
     hyear: Iterable[str] = HYEAR,
     hmonth: Iterable[str] = HMONTH,
-    hdays: Iterable[str] = HDAY,
+    hday: Iterable[str] = HDAY,
     bbox: list[float] = BBOX,
     data_format: str = DATA_FORMAT,
     download_format: str = DOWNLOAD_FORMAT,
@@ -81,7 +81,7 @@ def download(
         variable: Typically ``river_discharge_in_the_last_24_hours``.
         hyear: Years as strings.
         hmonth: Months as zero-padded strings.
-        hdays: Days as zero-padded strings.
+        hday: Days as zero-padded strings.
         bbox: ``[north, west, south, east]`` in degrees.
         data_format: ``grib2`` or ``netcdf``.
         download_format: ``unarchived`` or ``zip``.
@@ -117,7 +117,7 @@ def download(
         "variable": [variable],
         "hyear": list(hyear),
         "hmonth": list(hmonth),
-        "hday": list(hdays),
+        "hday": list(hday),
         "data_format": data_format,
         "download_format": download_format,
         "area": bbox,

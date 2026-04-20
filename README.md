@@ -28,17 +28,60 @@ the full provider documentation first.
 | 13 | GPWv4 | Global gridded population | NASA Earthdata | deferred (needs Earthdata account) |
 | 14 | [CHIRPS](docs/chirps/README.md) | Tropical-subtropical daily precipitation | Direct download | [notebook](notebooks/chirps_quickstart.ipynb) |
 
-## Installation
+## Two ways to use it
+
+1. **Local desktop app** (easiest): pick a dataset from a form, fill in a
+   few fields, click Download. Runs entirely on your machine via
+   Streamlit; your API keys are read from your standard config files and
+   never touched by the app itself. See the "Using the app" section below.
+2. **Scripts and notebooks** (for learning or scripting): each dataset
+   ships with a Python download script and a quickstart notebook. Use
+   these when you want to see how the API calls work, or build the
+   dataset into your own pipeline.
+
+## Using the app
+
+### First-time setup
+
+1. Install Python 3.10+ and clone this repo.
+2. Set up credentials for the datasets you plan to use (see
+   [Credentials](#credentials) below).
+3. From the repo root, run:
+   - Windows: double-click `setup.bat`
+   - macOS/Linux: `./setup.sh`
+   - Alternative (conda users): `conda env create -f environment.yml`
+
+This creates a `.venv/` and installs everything the app needs.
+
+### Daily use
+
+Launch the app:
+- Windows: double-click `run_app.bat`
+- macOS/Linux: `./run_app.sh`
+
+Your browser will open at `http://localhost:8501`. Pick a dataset from
+the sidebar, fill in the form, click Download. The output file appears
+in the folder shown on the results panel.
+
+### Safety
+
+The app runs locally and binds only to `localhost`. It does not read or
+store your credential strings: the underlying libraries (`cdsapi`,
+`requests` with `~/.netrc`, Earth Data Hub's Zarr client) read your
+credentials directly from the standard files exactly as they would when
+you invoke a script from the command line.
+
+### Scripts only
+
+If you just want the scripts and notebooks without the app:
 
 ```bash
-git clone https://github.com/<your-user>/climate-data-quickstart.git
-cd climate-data-quickstart
 pip install -r requirements.txt
+python scripts/era5_single_levels_download.py
 ```
 
-Some datasets need extra packages (for example `cfgrib` and `eccodes`
-for GloFAS GRIB output, or `zarr` and `aiohttp` for Earth Data Hub).
-Each dataset's docs page lists what you need.
+Each dataset's docs page lists the per-dataset extras (for example
+`cfgrib` and `eccodes` for GloFAS GRIB output).
 
 ## Credentials
 

@@ -50,8 +50,27 @@ OUTPUT_FILENAME: str = "era5_edh_test.nc"
 # ==================================================================
 
 
-def download() -> Path:
+def download(
+    edh_dataset_url: str = EDH_DATASET_URL,
+    variable: str = VARIABLE,
+    time_start: str = TIME_START,
+    time_end: str = TIME_END,
+    lat_north: float = LAT_NORTH,
+    lat_south: float = LAT_SOUTH,
+    lon_west: float = LON_WEST,
+    lon_east: float = LON_EAST,
+    output_dir: str = OUTPUT_DIR,
+    output_filename: str = OUTPUT_FILENAME,
+) -> Path:
     """Stream a subset from Earth Data Hub and save it as NetCDF.
+
+    Args:
+        edh_dataset_url: Full Zarr URL for the EDH dataset.
+        variable: Variable to pull.
+        time_start, time_end: ISO date strings.
+        lat_north, lat_south, lon_west, lon_east: Spatial bounds in degrees.
+        output_dir: Directory to write to.
+        output_filename: Output filename.
 
     Returns:
         Path to the saved NetCDF file.
@@ -63,13 +82,13 @@ def download() -> Path:
 
     import xarray as xr
 
-    output_path = Path(OUTPUT_DIR) / OUTPUT_FILENAME
+    output_path = Path(output_dir) / output_filename
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Open the Zarr store lazily. trust_env=True makes aiohttp pick up
     # credentials from ~/.netrc.
     ds = xr.open_dataset(
-        EDH_DATASET_URL,
+        edh_dataset_url,
         engine="zarr",
         chunks={},
         storage_options={"client_kwargs": {"trust_env": True}},
@@ -84,10 +103,10 @@ def download() -> Path:
 
     # Subset to the region and time window we want. Nothing is downloaded yet;
     # the lazy slice defines the byte-ranges that will be fetched on compute.
-    subset = ds[VARIABLE].sel(
-        time=slice(TIME_START, TIME_END),
-        latitude=slice(LAT_SOUTH, LAT_NORTH),
-        longitude=slice(LON_WEST, LON_EAST),
+    subset = ds[variable].sel(
+        time=slice(time_start, time_end),
+        latitude=slice(lat_south, lat_north),
+        longitude=slice(lon_west, lon_east),
     )
 
     # Materialise and save

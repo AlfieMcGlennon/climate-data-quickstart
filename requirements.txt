@@ -19,3 +19,15 @@ cartopy>=0.22.0
 jupyter>=1.0.0
 nbformat>=5.9.0
 nbconvert>=7.10.0
+
+# App: local Streamlit UI
+streamlit>=1.30.0
+
+# Earth Data Hub (streaming Zarr)
+zarr>=2.16.0
+fsspec>=2024.1.0
+aiohttp>=3.9.0
+
+# GRIB reading (for GloFAS etc.)
+cfgrib>=0.9.10.0
+eccodes>=1.6.0
