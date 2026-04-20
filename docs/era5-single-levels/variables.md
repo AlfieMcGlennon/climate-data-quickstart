@@ -26,10 +26,10 @@ unless otherwise noted.
 | `skin_temperature` | Temperature at the radiating surface (bare soil, vegetation canopy, sea, or ice) | K |
 | `maximum_2m_temperature_since_previous_post_processing` | Maximum 2 m temperature over the preceding accumulation window | K |
 | `minimum_2m_temperature_since_previous_post_processing` | Minimum 2 m temperature over the preceding accumulation window | K |
-| `ice_temperature_layer_1` | Sea-ice temperature, top layer (0-7 cm) | K |
-| `ice_temperature_layer_2` | Sea-ice temperature, layer 2 (7-28 cm) | K |
-| `ice_temperature_layer_3` | Sea-ice temperature, layer 3 (28-100 cm) | K |
-| `ice_temperature_layer_4` | Sea-ice temperature, layer 4 (100-289 cm) | K |
+| `ice_temperature_layer_1` | Sea-ice temperature, top layer (layer structure from the LIM2 sea-ice scheme; layer thicknesses are not published in the public ERA5 Confluence pages, consult the IFS documentation) | K |
+| `ice_temperature_layer_2` | Sea-ice temperature, layer 2 | K |
+| `ice_temperature_layer_3` | Sea-ice temperature, layer 3 | K |
+| `ice_temperature_layer_4` | Sea-ice temperature, layer 4 (bottom) | K |
 
 ## Wind
 
@@ -56,7 +56,7 @@ variables.
 | `mean_convective_precipitation_rate` | Mean rate of convective (sub-grid) precipitation | kg m-2 s-1 |
 | `mean_large_scale_precipitation_rate` | Mean rate of large-scale (stratiform, resolved) precipitation | kg m-2 s-1 |
 | `mean_total_precipitation_rate` | Mean rate of total precipitation (convective + large-scale) | kg m-2 s-1 |
-| `mean_evaporation_rate` | Mean surface evaporation rate (positive upwards) | kg m-2 s-1 |
+| `mean_evaporation_rate` | Mean surface evaporation rate. ECMWF uses the downward-positive flux convention, so evaporation is reported as **negative** (upward, loss to atmosphere); positive values indicate condensation | kg m-2 s-1 |
 | `mean_snowfall_rate` | Mean snowfall rate (water equivalent) | kg m-2 s-1 |
 | `mean_surface_sensible_heat_flux` | Mean surface sensible heat flux | W m-2 |
 | `mean_surface_latent_heat_flux` | Mean surface latent heat flux | W m-2 |
@@ -122,7 +122,7 @@ grid cells with non-zero lake fraction.
 
 | CDS API name | Description | Units |
 |---|---|---|
-| `evaporation` | Accumulated surface evaporation; positive values are gain to atmosphere | m of water equivalent |
+| `evaporation` | Accumulated surface evaporation. Downward-positive flux convention: evaporation is reported as **negative** (loss from surface to atmosphere); positive values indicate condensation | m of water equivalent |
 | `potential_evaporation` | Accumulated potential evaporation (evaporation demand assuming unlimited water) | m of water equivalent |
 | `runoff` | Accumulated total runoff (surface + subsurface) | m |
 | `surface_runoff` | Accumulated surface runoff | m |
@@ -193,8 +193,9 @@ and 100-289 cm.
 
 ## Ocean waves
 
-Wave variables come from the coupled ECMWF wave model. Resolution for waves
-is 0.5 degrees (not 0.25), and coverage is ocean only.
+Wave variables come from the coupled ECMWF wave model on a reduced
+latitude/longitude grid at approximately 0.36 degree resolution (not the
+0.25 degree atmospheric grid). Coverage is ocean only.
 
 | CDS API name | Description | Units |
 |---|---|---|

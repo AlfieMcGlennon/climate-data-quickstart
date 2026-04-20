@@ -16,7 +16,10 @@
       "Bash(python -c ':*)",
       "Bash(python scripts/era5_single_levels_download.py)",
       "Bash(jupyter nbconvert:*)",
-      "Bash(curl -sL -A \"Mozilla/5.0\" \"https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation\" -o /tmp/era5_doc.html)"
+      "Bash(curl -sL -A \"Mozilla/5.0\" \"https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation\" -o /tmp/era5_doc.html)",
+      "Bash(echo \"exit:$?\")",
+      "WebFetch(domain:codes.ecmwf.int)",
+      "WebFetch(domain:forum.ecmwf.int)"
     ]
   }
 }

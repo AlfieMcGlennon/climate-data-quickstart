@@ -6,6 +6,13 @@ on a single level (surface or near-surface), from 1940 to present, on a
 
 Produced by the Copernicus Climate Change Service (C3S) at ECMWF.
 
+> **Scope of this page.** This entry is a getting-started reference for
+> MSc/PhD students, early-career researchers, and practitioners new to
+> ERA5. It summarises what you need to download a first dataset and
+> understand the most common gotchas. It does **not** replace the ECMWF
+> primary documentation. For research-grade analysis, follow the Confluence
+> links throughout and consult the Hersbach et al. 2020 reference paper.
+
 ## What this dataset is
 
 ERA5 is the fifth generation of ECMWF's global atmospheric reanalysis. A
@@ -40,15 +47,16 @@ exposure analysis.
 | Temporal coverage | 1940-01-01 to present |
 | Update frequency | Daily |
 | Latency | ERA5T approx 5 days behind real time, final ERA5 approx 2 to 3 months behind |
-| Native archive | Reduced Gaussian N320 grid; the CDS pre-interpolates to regular lat/lon |
-| CRS | Decimal degrees on a spherical Earth of radius 6367.47 km (as encoded in GRIB1) |
+| Native archive | Spectral coefficients at triangular truncation T639, reduced Gaussian grid N320 (atmosphere); reduced lat/lon grid at 0.36 degrees (ocean waves). The CDS pre-interpolates to regular lat/lon on download. |
+| CRS | Decimal degrees on a spherical Earth; radius depends on the GRIB edition (see below) |
 
-The ECMWF-encoded spherical Earth is not identical to WGS84 (EPSG:4326). Most
-tooling reprojects transparently and the difference is sub-kilometre, which is
-smaller than the 31 km grid cell and safe to ignore for typical use. If you are
+Earth radius encoded in ECMWF ERA5 files differs between GRIB editions:
+**6367.47 km in GRIB1** and **6371.2229 km in GRIB2**. Neither matches WGS84
+(EPSG:4326) exactly, but the offset is sub-kilometre, which is smaller than
+the 31 km grid cell and safe to ignore for typical use. If you are
 co-registering ERA5 with high-resolution observation networks or point-measured
-coordinates where sub-kilometre accuracy matters, be aware of the flag and
-consult the ECMWF spatial reference note
+coordinates where sub-kilometre accuracy matters, consult the ECMWF spatial
+reference note
 (https://confluence.ecmwf.int/display/CKB/ERA5%3A+What+is+the+spatial+reference).
 
 The 1940-1958 segment comes from the back extension; see [Known issues](#known-issues)
@@ -108,15 +116,29 @@ succeed.
 
 ### 3. Create `~/.cdsapirc`
 
-Copy your Personal Access Token from the "Your profile" page. Create a file at
-`~/.cdsapirc` with two lines:
+Copy your Personal Access Token from the "Your profile" page. Create a file
+named `.cdsapirc` in your home directory with two lines:
 
 ```
 url: https://cds.climate.copernicus.eu/api
 key: <your-personal-access-token>
 ```
 
-On Windows the equivalent path is `%USERPROFILE%\.cdsapirc`.
+**Path by operating system:**
+
+- macOS / Linux: `~/.cdsapirc` (home directory)
+- Windows: `%USERPROFILE%\.cdsapirc` (usually `C:\Users\<yourname>\.cdsapirc`)
+
+**Creating a file with a leading dot on Windows.** File Explorer will refuse
+to name a file `.cdsapirc` directly (it treats the leading dot as an empty
+filename). Two workarounds:
+
+- Open a terminal (PowerShell or Command Prompt), `cd %USERPROFILE%`, then
+  `notepad .cdsapirc`. Notepad asks whether to create a new file; click
+  Yes, paste the two lines, save.
+- Or save the file initially as `cdsapirc.txt` in your user directory, then
+  rename to `.cdsapirc.` (note the trailing dot, which Windows strips on
+  save, leaving `.cdsapirc`).
 
 ### 4. Install the Python client
 
@@ -209,15 +231,60 @@ The CDS returns two production streams for recent data:
 - **ERA5** (final): available approximately 2 to 3 months behind real time
   after quality control completes.
 
-Records are distinguished via the `expver` dimension: `expver=1` is final ERA5,
-`expver=5` is ERA5T. When both cover the same period, downstream code must
-select or merge them explicitly. Small revisions can appear at the
-ERA5/ERA5T boundary when final ERA5 supersedes preliminary values.
+Records are distinguished via the `expver` coordinate. In the current CDS
+NetCDF output the values are **strings**: `"0001"` for final ERA5 and
+`"0005"` for ERA5T. (In GRIB headers and older CDS output they appear as
+the integers 1 and 5.) When a request straddles the ERA5T boundary the
+returned dataset has a length-2 `expver` coordinate, and downstream code
+must select or merge the two streams explicitly:
+
+```python
+# Keep only final ERA5 and drop time steps that only exist in ERA5T
+final = ds.sel(expver="0001").dropna("valid_time", how="all")
+
+# Or merge: take final where available, fall back to ERA5T otherwise
+merged = ds.sel(expver="0001").combine_first(ds.sel(expver="0005"))
+```
+
+Small revisions can appear at the ERA5/ERA5T boundary when final ERA5
+supersedes preliminary values.
+
+## Gotchas before you scale up
+
+Short, practical flags that catch most new users. Linked to the primary
+source for full detail.
+
+- **Land-sea mask.** ERA5's native land-sea mask is at 0.25 degree
+  resolution and does not align with high-resolution coastlines. Coastal
+  grid cells mix land and sea values. If you mask with Natural Earth or
+  similar vector coastlines you will silently get wrong values for coastal
+  points. Use the ERA5 `land_sea_mask` variable (via the CDS) for any
+  coastal analysis. See
+  https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation.
+- **Accumulation timestamp convention.** For accumulated or mean-rate
+  variables (precipitation, radiation, fluxes) the value at a given
+  timestamp is the accumulation or mean over the **preceding** period,
+  not the period starting at that timestamp. The value at 00:00 UTC on
+  day D is the hour 23:00 D-1 to 00:00 D. Daily-totals code that treats
+  the 00:00 UTC value as "day D at midnight" is off by one hour. See
+  https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation.
+- **ERA5.1 for 2000-2006 work.** ERA5.1 is a **separate dataset**, not an
+  embedded correction. The standard `reanalysis-era5-single-levels` entry
+  returns uncorrected 2000-2006 data with the known
+  lower-stratosphere/upper-troposphere cold bias. Analyses of the
+  2000-2006 window should switch to the ERA5.1 CDS entry explicitly.
+- **expver as string, not int.** In the current CDS NetCDF output the
+  `expver` coordinate is a string (`"0001"`, `"0005"`). Old tutorials
+  using `ds.sel(expver=1)` will fail. See the [ERA5 versus ERA5T](#era5-versus-era5t)
+  section for the current selection pattern.
 
 ## Known issues
 
-- **Lower-stratosphere cold bias 2000-2006.** ERA5.1 was produced as a
-  correction for this period.
+- **Lower-stratosphere and upper-tropospheric cold bias 2000-2006.**
+  Corrected in ERA5.1, which is a **separate CDS entry**, not embedded in
+  ERA5. The standard single-levels entry still returns the uncorrected
+  fields for that window. If your analysis depends on the 2000-2006 period,
+  use the ERA5.1 dataset and document the choice.
 - **Stream-boundary artefacts.** ERA5 was produced as multiple parallel streams
   that were spliced together. Deeper soil layers and upper atmospheric levels
   spin up more slowly; analyses of long-term trends across stream boundaries
@@ -249,6 +316,76 @@ ERA5/ERA5T boundary when final ERA5 supersedes preliminary values.
   https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation
   and https://confluence.ecmwf.int/display/CKB/The+family+of+ERA5+datasets.
 
+## Recipes
+
+Short, practical patterns for common tasks. All assume you have run the
+minimal quickstart and have a NetCDF file open as `ds`.
+
+### Aggregating hourly to daily Tmax and Tmin
+
+Two routes exist. Choose based on what you asked the CDS for.
+
+```python
+# Route A: you downloaded hourly 2m_temperature
+# Use xarray to resample. This is the most flexible option.
+daily_tmax = ds["t2m"].resample(valid_time="1D").max()
+daily_tmin = ds["t2m"].resample(valid_time="1D").min()
+
+# Route B: you downloaded maximum_2m_temperature_since_previous_post_processing
+# The CDS already stores the maximum over the preceding accumulation window.
+# For hourly output the window is 1 hour, so the daily max is the max of the
+# 24 hourly values. Careful with the timestamp convention: the value at
+# 00:00 UTC on day D is the max over 23:00 D-1 to 00:00 D.
+daily_tmax = ds["mx2t"].resample(valid_time="1D").max()
+```
+
+Route A gives you full control and is usually what dissertations need.
+Route B saves bandwidth if you only need extremes and are willing to live
+with the CDS's accumulation definition.
+
+### Selecting final ERA5 versus ERA5T
+
+See the [ERA5 versus ERA5T](#era5-versus-era5t) section above for the
+`ds.sel(expver="0001")` pattern.
+
+### Scaling up: a month-by-month loop
+
+Large requests are deprioritised in the CDS queue. Looping over months is
+almost always faster end-to-end than one monolithic request.
+
+```python
+import calendar
+from pathlib import Path
+import cdsapi
+
+client = cdsapi.Client()
+output_dir = Path("./data/era5-single-levels")
+output_dir.mkdir(parents=True, exist_ok=True)
+
+for year in range(2015, 2025):
+    for month in range(1, 13):
+        out = output_dir / f"era5_2t_{year}_{month:02d}.nc"
+        if out.exists():
+            continue
+        days = [f"{d:02d}" for d in range(1, calendar.monthrange(year, month)[1] + 1)]
+        request = {
+            "product_type": ["reanalysis"],
+            "variable": ["2m_temperature"],
+            "year": [str(year)],
+            "month": [f"{month:02d}"],
+            "day": days,
+            "time": [f"{h:02d}:00" for h in range(24)],
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "area": [55, -8, 49, 2],  # UK
+        }
+        client.retrieve("reanalysis-era5-single-levels", request).download(str(out))
+```
+
+The `if out.exists(): continue` guard makes the loop safe to interrupt and
+resume: already-downloaded months are skipped. Concatenate afterwards with
+`xr.open_mfdataset(output_dir.glob("*.nc"), combine="by_coords")`.
+
 ## Licence and attribution
 
 Licence: Licence to use Copernicus Products. This is the licence name listed
@@ -275,6 +412,44 @@ Reference paper:
 > Hersbach, H., Bell, B., Berrisford, P., et al. (2020). The ERA5 global
 > reanalysis. Quarterly Journal of the Royal Meteorological Society, 146(730),
 > 1999-2049. DOI: 10.1002/qj.3803
+
+## Glossary
+
+Short definitions of the jargon that appears in this page and the wider ERA5
+documentation.
+
+- **Reanalysis** - a dataset that reconstructs historical weather and
+  climate by combining past observations with a single consistent forecast
+  model. Unlike a raw observation record, every grid point has a value at
+  every timestamp; unlike a pure simulation, observations pull the model
+  toward reality at each assimilation step.
+- **ECMWF** - European Centre for Medium-Range Weather Forecasts. Produces
+  and maintains ERA5 on behalf of the Copernicus Climate Change Service.
+- **C3S** - Copernicus Climate Change Service, the EU programme that funds
+  and operates the Climate Data Store.
+- **CDS** - Climate Data Store, the web-and-API catalogue at
+  https://cds.climate.copernicus.eu where ERA5 and related datasets are
+  served.
+- **GRIB** - WMO binary format for gridded meteorological data. ECMWF's
+  native archive format. Two editions are in use (GRIB1 and GRIB2); they
+  differ in encoding detail including the Earth radius.
+- **NetCDF** - self-describing binary format for multi-dimensional
+  scientific data, widely used with `xarray`. The CDS converts GRIB to
+  NetCDF on request.
+- **ERA5T** - preliminary release of ERA5 that fills the gap between
+  final ERA5 (2-3 months latency) and real time. Distinguished in output
+  by the `expver` coordinate.
+- **expver** - "experiment version", a coordinate in CDS output that
+  tags records as final ERA5 (`"0001"`) or ERA5T (`"0005"`).
+- **BBOX** - bounding box. A 4-element list `[north, west, south, east]`
+  in decimal degrees defining a rectangular region of interest. The order
+  differs from the more common `[west, south, east, north]` used by many
+  GIS tools; always check.
+- **xarray** - Python library for labelled multi-dimensional arrays. The
+  de-facto standard for working with NetCDF climate data.
+- **cartopy** - Python library for geographic projections and map
+  plotting. Used alongside matplotlib.
+- **cfgrib** - Python library that lets xarray read GRIB files directly.
 
 ## Further reading
 
