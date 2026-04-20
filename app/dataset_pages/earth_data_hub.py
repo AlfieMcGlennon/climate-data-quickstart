@@ -120,7 +120,8 @@ ds = ds.sortby("latitude").sortby("longitude")
 
 # Lazy slice: defines the byte-ranges that will be fetched later.
 # No network traffic happens on this line.
-time_dim = "valid_time" if "valid_time" in ds.dims else "time"
+# EDH ERA5 stores use 'valid_time'; older ones used 'time'.
+time_dim = "valid_time" if "valid_time" in ds.sizes else "time"
 indexers = {{
     time_dim: slice("{config["time_start"]}", "{config["time_end"]}"),
     "latitude": slice({config["lat_south"]}, {config["lat_north"]}),

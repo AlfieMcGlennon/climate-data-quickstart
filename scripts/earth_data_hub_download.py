@@ -101,9 +101,19 @@ def download(
         ds = ds.assign_coords(longitude=(((ds["longitude"] + 180) % 360) - 180))
     ds = ds.sortby("latitude").sortby("longitude")
 
-    # Detect the time dimension name: EDH ERA5 stores use 'valid_time'
-    # (matching the CDS NetCDF convention), older ones use 'time'.
-    time_dim = "valid_time" if "valid_time" in ds.dims else "time"
+    # Detect the time dimension name. EDH ERA5 stores use 'valid_time'
+    # (matching the current CDS NetCDF convention); older stores used
+    # 'time'. Use ds.sizes (keys) which is the documented public way to
+    # access dimension names in modern xarray.
+    dim_names = tuple(ds.sizes)
+    if "valid_time" in dim_names:
+        time_dim = "valid_time"
+    elif "time" in dim_names:
+        time_dim = "time"
+    else:
+        raise RuntimeError(
+            f"Could not find a time dimension. Available dims: {dim_names}"
+        )
 
     # Subset to the region and time window we want. Nothing is downloaded yet;
     # the lazy slice defines the byte-ranges that will be fetched on compute.
