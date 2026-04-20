@@ -52,7 +52,13 @@ _SCALE: dict[str, float] = {
 
 
 def _dly_colspecs() -> tuple[list[tuple[int, int]], list[str]]:
-    """Build the column specs for pandas.read_fwf for a .dly file."""
+    """Build the column specs for pandas.read_fwf for a .dly file.
+
+    The GHCNd .dly format is 269 chars per line:
+    - ID (1-11), YEAR (12-15), MONTH (16-17), ELEMENT (18-21)
+    - Then 31 daily records of 8 chars each: VALUE (5), MFLAG (1),
+      QFLAG (1), SFLAG (1). pandas colspecs are (start, end) zero-indexed.
+    """
     colspecs = [(0, 11), (11, 15), (15, 17), (17, 21)]
     names = ["id", "year", "month", "element"]
     pos = 21
@@ -63,7 +69,7 @@ def _dly_colspecs() -> tuple[list[tuple[int, int]], list[str]]:
             (pos + 6, pos + 7),
             (pos + 7, pos + 8),
         ]
-        names += [f"value{d}", f"mflag{d}", f"qflag{d}", f"sflag{d}"]
+        names += [f"value_{d:02d}", f"mflag_{d:02d}", f"qflag_{d:02d}", f"sflag_{d:02d}"]
         pos += 8
     return colspecs, names
 
@@ -81,6 +87,10 @@ def download(
     ``value`` (scaled to natural units), and ``qflag``, ``mflag``,
     ``sflag`` (the three QC/metadata flags).
 
+    Implementation uses a single vectorised ``wide_to_long`` reshape
+    (one pass over the data) followed by vectorised scaling and
+    date construction.
+
     Args:
         station_id: 11-character GHCNd station ID.
         elements: Tuple of element codes to keep (e.g. ``("TMAX", "TMIN", "PRCP")``).
@@ -95,33 +105,24 @@ def download(
 
     url = f"{GHCND_BASE}/all/{station_id}.dly"
     colspecs, names = _dly_colspecs()
-    df_wide = pd.read_fwf(url, colspecs=colspecs, names=names, na_values=["-9999"])
+    wide = pd.read_fwf(url, colspecs=colspecs, names=names, na_values=["-9999"])
 
     if elements:
-        df_wide = df_wide[df_wide["element"].isin(elements)].copy()
+        wide = wide[wide["element"].isin(elements)].copy()
 
-    value_cols = [f"value{d}" for d in range(1, 32)]
-    mflag_cols = [f"mflag{d}" for d in range(1, 32)]
-    qflag_cols = [f"qflag{d}" for d in range(1, 32)]
-    sflag_cols = [f"sflag{d}" for d in range(1, 32)]
+    # Single vectorised reshape: four stub columns (value, mflag, qflag, sflag)
+    # with suffix "_DD" for day of month.
+    long = pd.wide_to_long(
+        wide,
+        stubnames=["value", "mflag", "qflag", "sflag"],
+        i=["id", "year", "month", "element"],
+        j="day",
+        sep="_",
+        suffix=r"\d{2}",
+    ).reset_index()
+    long["day"] = long["day"].astype(int)
 
-    # Melt four times, then merge.
-    def _melt(cols, name):
-        m = df_wide.melt(
-            id_vars=["id", "year", "month", "element"],
-            value_vars=cols,
-            var_name="day",
-            value_name=name,
-        )
-        m["day"] = m["day"].str.replace(r"^[a-z]+", "", regex=True).astype(int)
-        return m
-
-    long = _melt(value_cols, "value")
-    long["mflag"] = _melt(mflag_cols, "mflag")["mflag"]
-    long["qflag"] = _melt(qflag_cols, "qflag")["qflag"]
-    long["sflag"] = _melt(sflag_cols, "sflag")["sflag"]
-
-    # Drop rows where the value is missing (-9999 became NaN via na_values)
+    # Drop rows where the value is missing
     long = long.dropna(subset=["value"])
 
     # Build a proper date; drop impossible combinations (e.g. Feb 30)
@@ -131,11 +132,8 @@ def download(
     )
     long = long.dropna(subset=["date"]).copy()
 
-    # Apply element-specific scaling
-    long["value"] = long.apply(
-        lambda r: r["value"] * _SCALE.get(r["element"], 1.0),
-        axis=1,
-    )
+    # Vectorised scaling: look up the factor per element
+    long["value"] = long["value"] * long["element"].map(_SCALE).fillna(1.0)
 
     if drop_failed_qc:
         long = long[long["qflag"].isna() | (long["qflag"].str.strip() == "")]
