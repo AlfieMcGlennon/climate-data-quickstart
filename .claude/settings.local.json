@@ -22,7 +22,8 @@
       "WebFetch(domain:forum.ecmwf.int)",
       "Bash(curl -sL --max-time 30 \"https://hadleyserver.metoffice.gov.uk/hadcet/data/meantemp_monthly_totals.txt\")",
       "Bash(curl -sL --max-time 60 --verbose \"https://hadleyserver.metoffice.gov.uk/hadcet/data/meantemp_monthly_totals.txt\" -o /tmp/hadcet_test.txt)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(streamlit run:*)"
     ]
   }
 }

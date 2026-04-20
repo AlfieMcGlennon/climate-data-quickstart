@@ -101,13 +101,18 @@ def download(
         ds = ds.assign_coords(longitude=(((ds["longitude"] + 180) % 360) - 180))
     ds = ds.sortby("latitude").sortby("longitude")
 
+    # Detect the time dimension name: EDH ERA5 stores use 'valid_time'
+    # (matching the CDS NetCDF convention), older ones use 'time'.
+    time_dim = "valid_time" if "valid_time" in ds.dims else "time"
+
     # Subset to the region and time window we want. Nothing is downloaded yet;
     # the lazy slice defines the byte-ranges that will be fetched on compute.
-    subset = ds[variable].sel(
-        time=slice(time_start, time_end),
-        latitude=slice(lat_south, lat_north),
-        longitude=slice(lon_west, lon_east),
-    )
+    indexers = {
+        time_dim: slice(time_start, time_end),
+        "latitude": slice(lat_south, lat_north),
+        "longitude": slice(lon_west, lon_east),
+    }
+    subset = ds[variable].sel(indexers)
 
     # Materialise and save
     subset.load().to_netcdf(output_path)

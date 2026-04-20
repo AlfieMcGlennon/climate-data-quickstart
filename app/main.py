@@ -13,6 +13,7 @@ as the command-line route, which in turn call ``cdsapi.Client()`` and
 from __future__ import annotations
 
 import sys
+import traceback
 from pathlib import Path
 
 # Ensure the repo root is on sys.path so ``scripts.*`` and ``common.*``
@@ -49,9 +50,7 @@ def _render_sidebar() -> str:
 
     st.sidebar.divider()
     st.sidebar.caption(
-        "Source: "
-        "[github.com](https://github.com/) - "
-        "see `docs/{slug}/README.md` for each dataset's full reference."
+        "See `docs/{slug}/README.md` for each dataset's full reference."
     )
     return slug
 
@@ -95,15 +94,43 @@ def main() -> None:
         for m in missing:
             st.caption(f"- Missing: `{m.location}` (register at {m.registration_url})")
 
-    # Render the dataset-specific form inside a container; the form
-    # returns the config dict that will feed the download function.
+    # Render the dataset-specific form. The form returns the config dict
+    # that feeds the download function.
     with st.form(key=f"form_{slug}"):
         config = module.render_form()
-        submitted = st.form_submit_button(
-            "Download",
-            disabled=not ready,
-            use_container_width=True,
+
+        # EDH is streaming-first. Show code snippet by default, download
+        # only if the user explicitly asks for a file.
+        if slug == "earth-data-hub":
+            c1, c2 = st.columns(2)
+            show_code = c1.form_submit_button(
+                "Show streaming code",
+                use_container_width=True,
+                disabled=not ready,
+            )
+            download = c2.form_submit_button(
+                "Download sliced data to file",
+                use_container_width=True,
+                disabled=not ready,
+            )
+            submitted = download
+        else:
+            submitted = st.form_submit_button(
+                "Download",
+                disabled=not ready,
+                use_container_width=True,
+            )
+            show_code = False
+
+    # Streaming code display for EDH, outside the form so it renders after
+    # the buttons.
+    if slug == "earth-data-hub" and (show_code or submitted):
+        st.subheader("Streaming code snippet")
+        st.caption(
+            "Copy this into a notebook or script to work with the data lazily. "
+            "Only the bytes you actually reduce or save flow over the network."
         )
+        st.code(module.streaming_snippet(config), language="python")
 
     if submitted:
         _run_and_display(slug, config)
@@ -112,12 +139,24 @@ def main() -> None:
 def _run_and_display(slug: str, config: dict) -> None:
     """Invoke the download and render the result panel."""
     status = st.empty()
-    status.info("Submitting request... this can take minutes for CDS queues.")
+    if slug == "earth-data-hub":
+        status.info(
+            "Streaming sliced bytes from Earth Data Hub. Time scales with "
+            "how much data you asked for, not with a queue."
+        )
+    else:
+        status.info(
+            "Submitting request. CDS requests are queued server-side; direct "
+            "downloads are usually immediate."
+        )
+
     try:
         output_path = run(slug, config)
     except Exception as exc:
-        status.error(f"Download failed: {type(exc).__name__}: {exc}")
-        st.exception(exc)
+        status.empty()
+        st.error(f"Download failed: {type(exc).__name__}: {exc}")
+        with st.expander("Full traceback"):
+            st.code(traceback.format_exc(), language="python")
         return
 
     status.empty()

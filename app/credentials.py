@@ -29,14 +29,37 @@ class CredentialStatus:
     instructions: str
 
 
+def _netrc_paths() -> list[Path]:
+    """Return the candidate netrc paths for the current OS.
+
+    Unix-like systems use ``~/.netrc``. Windows uses ``~/_netrc`` because
+    File Explorer has historically refused leading-dot filenames. We
+    check both on every platform since users sometimes port config
+    between environments.
+    """
+    home = Path.home()
+    return [home / ".netrc", home / "_netrc"]
+
+
 def _netrc_has(machine: str) -> bool:
-    path = Path.home() / ".netrc"
-    if not path.exists():
-        return False
-    try:
-        return f"machine {machine}" in path.read_text(encoding="utf-8", errors="ignore")
-    except OSError:
-        return False
+    for path in _netrc_paths():
+        if not path.exists():
+            continue
+        try:
+            if f"machine {machine}" in path.read_text(encoding="utf-8", errors="ignore"):
+                return True
+        except OSError:
+            continue
+    return False
+
+
+def _netrc_location_hint() -> str:
+    """Return a friendly description of which netrc file was found (if any)."""
+    for path in _netrc_paths():
+        if path.exists():
+            return str(path)
+    # Neither exists: suggest the native one for this OS
+    return str(_netrc_paths()[1] if Path.home().drive else _netrc_paths()[0])
 
 
 def check_cds() -> CredentialStatus:
@@ -56,13 +79,17 @@ def check_cds() -> CredentialStatus:
 
 
 def check_earthdata() -> CredentialStatus:
-    """Check NASA Earthdata credentials (~/.netrc entry)."""
+    """Check NASA Earthdata credentials (netrc entry)."""
+    configured = _netrc_has("urs.earthdata.nasa.gov")
     return CredentialStatus(
-        configured=_netrc_has("urs.earthdata.nasa.gov"),
-        location="~/.netrc (entry for urs.earthdata.nasa.gov)",
+        configured=configured,
+        location=(
+            f"{_netrc_location_hint()} (entry for urs.earthdata.nasa.gov)"
+        ),
         registration_url="https://urs.earthdata.nasa.gov/",
         instructions=(
-            "Register at the URL above, then add a block to ~/.netrc:\n"
+            "Register at the URL above, then add a block to your netrc file\n"
+            "(~/.netrc on Linux/macOS, ~/_netrc on Windows):\n"
             "  machine urs.earthdata.nasa.gov\n"
             "  login YOUR_USERNAME\n"
             "  password YOUR_PASSWORD"
@@ -71,7 +98,7 @@ def check_earthdata() -> CredentialStatus:
 
 
 def check_edh() -> CredentialStatus:
-    """Check Earth Data Hub credentials (~/.netrc entry or env var)."""
+    """Check Earth Data Hub credentials (netrc entry or env var)."""
     via_env = bool(os.environ.get("EDH_API_KEY"))
     via_netrc = _netrc_has("data.earthdatahub.destine.eu")
     return CredentialStatus(
@@ -79,12 +106,13 @@ def check_edh() -> CredentialStatus:
         location=(
             "EDH_API_KEY env var"
             if via_env
-            else "~/.netrc (entry for data.earthdatahub.destine.eu)"
+            else f"{_netrc_location_hint()} (entry for data.earthdatahub.destine.eu)"
         ),
         registration_url="https://platform.destine.eu/",
         instructions=(
             "Register at the URL above, generate a Personal Access Token in "
-            "Earth Data Hub settings, then add a block to ~/.netrc:\n"
+            "Earth Data Hub settings, then add a block to your netrc file\n"
+            "(~/.netrc on Linux/macOS, ~/_netrc on Windows):\n"
             "  machine data.earthdatahub.destine.eu\n"
             "  login your-destine-username\n"
             "  password YOUR_TOKEN"

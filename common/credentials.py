@@ -38,45 +38,50 @@ def check_cds_credentials() -> Path:
 
 
 def check_netrc_entry(machine: str) -> Path:
-    """Verify a ``~/.netrc`` entry exists for a given host.
+    """Verify a netrc entry exists for a given host.
 
-    Used by datasets that authenticate via NASA Earthdata, Earth Data Hub, or
-    similar services that read credentials from ``~/.netrc``.
+    Checks both ``~/.netrc`` (Linux/macOS convention) and ``~/_netrc``
+    (Windows convention, since Windows File Explorer does not accept
+    leading-dot filenames by default).
 
     Args:
         machine: Hostname to look for (e.g., ``urs.earthdata.nasa.gov``,
             ``data.earthdatahub.destine.eu``).
 
     Returns:
-        Path to the ``~/.netrc`` file.
+        Path to the netrc file that contains the matching entry.
 
     Raises:
-        FileNotFoundError: If ``~/.netrc`` does not exist or has no entry for
-            the given machine.
+        FileNotFoundError: If no netrc file exists or none of them has
+            an entry for the given machine.
     """
-    path = Path.home() / ".netrc"
-    if not path.exists():
+    candidates = [Path.home() / ".netrc", Path.home() / "_netrc"]
+    existing = [p for p in candidates if p.exists()]
+
+    if not existing:
         raise FileNotFoundError(
-            f"~/.netrc not found. This dataset needs an entry for '{machine}'.\n"
-            "For NASA Earthdata, register at https://urs.earthdata.nasa.gov/ "
-            "and follow https://disc.gsfc.nasa.gov/data-access#mac_linux_wget "
-            "to set up ~/.netrc.\n"
-            "For Earth Data Hub, register at https://platform.destine.eu/ and "
-            "add your personal access token to ~/.netrc under "
-            "machine data.earthdatahub.destine.eu."
+            f"No netrc file found. This dataset needs an entry for '{machine}'.\n"
+            "Create ~/.netrc (Linux/macOS) or ~/_netrc (Windows) with a block:\n"
+            f"  machine {machine}\n"
+            "  login YOUR_USERNAME\n"
+            "  password YOUR_PASSWORD_OR_TOKEN\n"
+            "For NASA Earthdata, register at https://urs.earthdata.nasa.gov/.\n"
+            "For Earth Data Hub, register at https://platform.destine.eu/."
         )
 
-    # Read without parsing credentials, just check machine line is present
-    content = path.read_text(encoding="utf-8", errors="ignore")
-    if f"machine {machine}" not in content:
-        raise FileNotFoundError(
-            f"~/.netrc exists but has no entry for '{machine}'.\n"
-            f"Add a block:\n"
-            f"  machine {machine}\n"
-            f"  login YOUR_USERNAME\n"
-            f"  password YOUR_PASSWORD_OR_TOKEN"
-        )
-    return path
+    for path in existing:
+        content = path.read_text(encoding="utf-8", errors="ignore")
+        if f"machine {machine}" in content:
+            return path
+
+    locations = ", ".join(str(p) for p in existing)
+    raise FileNotFoundError(
+        f"netrc file(s) found at {locations} but none has an entry for '{machine}'.\n"
+        f"Add a block:\n"
+        f"  machine {machine}\n"
+        f"  login YOUR_USERNAME\n"
+        f"  password YOUR_PASSWORD_OR_TOKEN"
+    )
 
 
 def check_edh_token() -> str | None:
