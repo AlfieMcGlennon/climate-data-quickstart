@@ -123,7 +123,7 @@ Licence: Licence to use Copernicus Products. Commercial use is permitted
 with attribution.
 
 Full licence:
-https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
+https://cds.climate.copernicus.eu/datasets/reanalysis-era5-pressure-levels?tab=terms
 
 Attribution: state "Generated using Copernicus Climate Change Service
 information [Year]" and cite the DOI and Hersbach et al. 2020.

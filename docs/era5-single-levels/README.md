@@ -316,76 +316,6 @@ source for full detail.
   https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation
   and https://confluence.ecmwf.int/display/CKB/The+family+of+ERA5+datasets.
 
-## Recipes
-
-Short, practical patterns for common tasks. All assume you have run the
-minimal quickstart and have a NetCDF file open as `ds`.
-
-### Aggregating hourly to daily Tmax and Tmin
-
-Two routes exist. Choose based on what you asked the CDS for.
-
-```python
-# Route A: you downloaded hourly 2m_temperature
-# Use xarray to resample. This is the most flexible option.
-daily_tmax = ds["t2m"].resample(valid_time="1D").max()
-daily_tmin = ds["t2m"].resample(valid_time="1D").min()
-
-# Route B: you downloaded maximum_2m_temperature_since_previous_post_processing
-# The CDS already stores the maximum over the preceding accumulation window.
-# For hourly output the window is 1 hour, so the daily max is the max of the
-# 24 hourly values. Careful with the timestamp convention: the value at
-# 00:00 UTC on day D is the max over 23:00 D-1 to 00:00 D.
-daily_tmax = ds["mx2t"].resample(valid_time="1D").max()
-```
-
-Route A gives you full control and is usually what dissertations need.
-Route B saves bandwidth if you only need extremes and are willing to live
-with the CDS's accumulation definition.
-
-### Selecting final ERA5 versus ERA5T
-
-See the [ERA5 versus ERA5T](#era5-versus-era5t) section above for the
-`ds.sel(expver="0001")` pattern.
-
-### Scaling up: a month-by-month loop
-
-Large requests are deprioritised in the CDS queue. Looping over months is
-almost always faster end-to-end than one monolithic request.
-
-```python
-import calendar
-from pathlib import Path
-import cdsapi
-
-client = cdsapi.Client()
-output_dir = Path("./data/era5-single-levels")
-output_dir.mkdir(parents=True, exist_ok=True)
-
-for year in range(2015, 2025):
-    for month in range(1, 13):
-        out = output_dir / f"era5_2t_{year}_{month:02d}.nc"
-        if out.exists():
-            continue
-        days = [f"{d:02d}" for d in range(1, calendar.monthrange(year, month)[1] + 1)]
-        request = {
-            "product_type": ["reanalysis"],
-            "variable": ["2m_temperature"],
-            "year": [str(year)],
-            "month": [f"{month:02d}"],
-            "day": days,
-            "time": [f"{h:02d}:00" for h in range(24)],
-            "data_format": "netcdf",
-            "download_format": "unarchived",
-            "area": [55, -8, 49, 2],  # UK
-        }
-        client.retrieve("reanalysis-era5-single-levels", request).download(str(out))
-```
-
-The `if out.exists(): continue` guard makes the loop safe to interrupt and
-resume: already-downloaded months are skipped. Concatenate afterwards with
-`xr.open_mfdataset(output_dir.glob("*.nc"), combine="by_coords")`.
-
 ## Licence and attribution
 
 Licence: Licence to use Copernicus Products. This is the licence name listed
@@ -393,7 +323,7 @@ on the CDS dataset page and the one you accept when the dataset is added to
 your CDS profile.
 
 Full licence text:
-https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
+https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=terms
 
 Attribution: derived products must state "Generated using Copernicus Climate
 Change Service information [Year]" and cite the DOI and the Hersbach et al.
@@ -412,44 +342,6 @@ Reference paper:
 > Hersbach, H., Bell, B., Berrisford, P., et al. (2020). The ERA5 global
 > reanalysis. Quarterly Journal of the Royal Meteorological Society, 146(730),
 > 1999-2049. DOI: 10.1002/qj.3803
-
-## Glossary
-
-Short definitions of the jargon that appears in this page and the wider ERA5
-documentation.
-
-- **Reanalysis** - a dataset that reconstructs historical weather and
-  climate by combining past observations with a single consistent forecast
-  model. Unlike a raw observation record, every grid point has a value at
-  every timestamp; unlike a pure simulation, observations pull the model
-  toward reality at each assimilation step.
-- **ECMWF** - European Centre for Medium-Range Weather Forecasts. Produces
-  and maintains ERA5 on behalf of the Copernicus Climate Change Service.
-- **C3S** - Copernicus Climate Change Service, the EU programme that funds
-  and operates the Climate Data Store.
-- **CDS** - Climate Data Store, the web-and-API catalogue at
-  https://cds.climate.copernicus.eu where ERA5 and related datasets are
-  served.
-- **GRIB** - WMO binary format for gridded meteorological data. ECMWF's
-  native archive format. Two editions are in use (GRIB1 and GRIB2); they
-  differ in encoding detail including the Earth radius.
-- **NetCDF** - self-describing binary format for multi-dimensional
-  scientific data, widely used with `xarray`. The CDS converts GRIB to
-  NetCDF on request.
-- **ERA5T** - preliminary release of ERA5 that fills the gap between
-  final ERA5 (2-3 months latency) and real time. Distinguished in output
-  by the `expver` coordinate.
-- **expver** - "experiment version", a coordinate in CDS output that
-  tags records as final ERA5 (`"0001"`) or ERA5T (`"0005"`).
-- **BBOX** - bounding box. A 4-element list `[north, west, south, east]`
-  in decimal degrees defining a rectangular region of interest. The order
-  differs from the more common `[west, south, east, north]` used by many
-  GIS tools; always check.
-- **xarray** - Python library for labelled multi-dimensional arrays. The
-  de-facto standard for working with NetCDF climate data.
-- **cartopy** - Python library for geographic projections and map
-  plotting. Used alongside matplotlib.
-- **cfgrib** - Python library that lets xarray read GRIB files directly.
 
 ## Further reading
 

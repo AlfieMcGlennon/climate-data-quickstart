@@ -16,10 +16,10 @@ temperature.
 | Property | Value |
 |---|---|
 | Resolution | 5 degree lat/lon (~555 km cells at the equator) |
-| Coverage | Global, 36 x 72 grid cells |
+| Spatial coverage | Global, 36 x 72 grid cells |
 | Temporal resolution | Monthly |
-| Coverage | 1850-01 to present |
-| Quantity | Temperature anomaly relative to 1961-1990 climatology |
+| Temporal coverage | 1850-01 to present |
+| Quantity | Temperature anomaly (degC) relative to 1961-1990 climatology |
 | Products | Ensemble mean (infilled + non-infilled), 200-member ensemble |
 | Format | NetCDF, plus CSV summary time series |
 | Access | Direct HTTPS download, no authentication |

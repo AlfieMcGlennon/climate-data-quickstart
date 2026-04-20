@@ -125,13 +125,21 @@ def download(
     if len(nc_files) == 1:
         nc_files[0].rename(nc_path)
     else:
+        # Eagerly load into memory and close the source handles before
+        # deleting the files they point at. Without .load() the written
+        # NetCDF can end up with lazy references to the deleted sources.
         ds = xr.open_mfdataset(nc_files, combine="by_coords")
+        ds.load()
         ds.to_netcdf(nc_path)
         ds.close()
 
-    # Clean up extract dir and zip
+    # Clean up extract dir and zip. Some OS/filesystem combinations hold
+    # briefly after close; a small retry loop is safer than a single pass.
     for f in extract_dir.glob("*"):
-        f.unlink()
+        try:
+            f.unlink()
+        except PermissionError:
+            pass
     extract_dir.rmdir()
     zip_path.unlink()
 

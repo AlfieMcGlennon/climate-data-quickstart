@@ -101,13 +101,21 @@ def download(
     client = cdsapi.Client()
     client.retrieve("insitu-gridded-observations-europe", request).download(str(zip_path))
 
-    # Unzip and move the largest (or first) .nc out to OUTPUT_FILENAME
+    # Extract every NetCDF from the archive. For ensemble_mean /
+    # ensemble_spread the archive usually contains one file; for
+    # ensemble_members it contains up to 100. We keep the first at
+    # OUTPUT_FILENAME and any siblings alongside it named after the
+    # archive members so nothing is silently discarded.
     with zipfile.ZipFile(zip_path) as zf:
-        members = [m for m in zf.namelist() if m.endswith(".nc")]
+        members = sorted(m for m in zf.namelist() if m.endswith(".nc"))
         if not members:
             raise RuntimeError(f"No NetCDF found in {zip_path}")
         with zf.open(members[0]) as src, open(nc_path, "wb") as dst:
             dst.write(src.read())
+        for extra in members[1:]:
+            extra_name = Path(extra).name
+            with zf.open(extra) as src, open(output_dir_path / extra_name, "wb") as dst:
+                dst.write(src.read())
     zip_path.unlink()
 
     return nc_path

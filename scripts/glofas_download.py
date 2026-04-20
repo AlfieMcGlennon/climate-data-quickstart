@@ -42,7 +42,7 @@ VARIABLE: str = "river_discharge_in_the_last_24_hours"
 # Request date. Use "h" prefix keys - this is a GloFAS convention.
 HYEAR: list[str] = ["2020"]
 HMONTH: list[str] = ["12"]
-HDAYS: list[str] = ["01"]
+HDAY: list[str] = ["01"]
 
 # Bounding box [north, west, south, east].
 BBOX: list[float] = [60, -10, 50, 2]  # UK
@@ -65,7 +65,7 @@ def download(
     variable: str = VARIABLE,
     hyear: Iterable[str] = HYEAR,
     hmonth: Iterable[str] = HMONTH,
-    hdays: Iterable[str] = HDAYS,
+    hdays: Iterable[str] = HDAY,
     bbox: list[float] = BBOX,
     data_format: str = DATA_FORMAT,
     download_format: str = DOWNLOAD_FORMAT,
