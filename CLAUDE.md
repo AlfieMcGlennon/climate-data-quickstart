@@ -128,7 +128,11 @@ working example, so narrative markdown sits between the code cells.
 2. **Imports with version check** - use
    `from importlib.metadata import version` then
    `print(f"cdsapi       {version('cdsapi')}")` for each package, because some
-   packages (cdsapi included) do not expose `__version__`
+   packages (cdsapi included) do not expose `__version__`. This cell also
+   finds the repo root by walking up from `Path.cwd()` looking for `CLAUDE.md`
+   (see the ERA5 notebook for the pattern), then adds it to `sys.path` so
+   `from common.credentials import ...` works regardless of where Jupyter
+   was launched
 3. **Download** - small test pull, 1 day, 1 variable, small region
 4. **Open with xarray** - `ds = xr.open_dataset(...)`, print dataset summary
 5. **Basic plot** - map or time series, whichever fits the dataset
