@@ -8,7 +8,7 @@ clear next step rather than a cryptic API error.
 Patterns:
     A - Copernicus CDS API (``~/.cdsapirc``)
     B - Direct download, optionally via NASA Earthdata (``~/.netrc``)
-    C - Custom Python API (Earth Data Hub token, CEDA bearer token)
+    C - Custom Python API (Earth Data Hub via ``~/.netrc``, CEDA bearer token)
 """
 
 from __future__ import annotations
@@ -40,11 +40,12 @@ def check_cds_credentials() -> Path:
 def check_netrc_entry(machine: str) -> Path:
     """Verify a ``~/.netrc`` entry exists for a given host.
 
-    Used by datasets that authenticate via NASA Earthdata or similar services
-    that read credentials from ``~/.netrc``.
+    Used by datasets that authenticate via NASA Earthdata, Earth Data Hub, or
+    similar services that read credentials from ``~/.netrc``.
 
     Args:
-        machine: Hostname to look for (e.g., ``urs.earthdata.nasa.gov``).
+        machine: Hostname to look for (e.g., ``urs.earthdata.nasa.gov``,
+            ``data.earthdatahub.destine.eu``).
 
     Returns:
         Path to the ``~/.netrc`` file.
@@ -59,7 +60,10 @@ def check_netrc_entry(machine: str) -> Path:
             f"~/.netrc not found. This dataset needs an entry for '{machine}'.\n"
             "For NASA Earthdata, register at https://urs.earthdata.nasa.gov/ "
             "and follow https://disc.gsfc.nasa.gov/data-access#mac_linux_wget "
-            "to set up ~/.netrc."
+            "to set up ~/.netrc.\n"
+            "For Earth Data Hub, register at https://platform.destine.eu/ and "
+            "add your personal access token to ~/.netrc under "
+            "machine data.earthdatahub.destine.eu."
         )
 
     # Read without parsing credentials, just check machine line is present
@@ -70,7 +74,7 @@ def check_netrc_entry(machine: str) -> Path:
             f"Add a block:\n"
             f"  machine {machine}\n"
             f"  login YOUR_USERNAME\n"
-            f"  password YOUR_PASSWORD"
+            f"  password YOUR_PASSWORD_OR_TOKEN"
         )
     return path
 
@@ -78,12 +82,13 @@ def check_netrc_entry(machine: str) -> Path:
 def check_edh_token() -> str:
     """Verify an Earth Data Hub access token is configured.
 
-    Earth Data Hub uses an environment variable or a token file. This check
-    prefers the ``EDH_API_KEY`` environment variable, falling back to
-    ``~/.edh_token`` if set.
+    EDH authenticates via ``~/.netrc`` or via the ``EDH_API_KEY`` environment
+    variable. This check prefers the env var, then falls back to a
+    ``~/.netrc`` entry for ``data.earthdatahub.destine.eu``.
 
     Returns:
-        The token string.
+        The token if available from env var, else a placeholder string
+        indicating that ``~/.netrc`` is configured.
 
     Raises:
         FileNotFoundError: If no token is configured via either mechanism.
@@ -92,16 +97,17 @@ def check_edh_token() -> str:
     if env_token:
         return env_token
 
-    path = Path.home() / ".edh_token"
-    if path.exists():
-        return path.read_text(encoding="utf-8").strip()
-
-    raise FileNotFoundError(
-        "Earth Data Hub token not found.\n"
-        "Set the EDH_API_KEY environment variable or save the token to "
-        "~/.edh_token.\n"
-        "Register at https://earthdatahub.destine.eu/ to obtain a token."
-    )
+    # Fall back to .netrc
+    try:
+        check_netrc_entry("data.earthdatahub.destine.eu")
+        return "<token in ~/.netrc>"
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "Earth Data Hub token not found.\n"
+            "Either set the EDH_API_KEY environment variable or add an entry "
+            "to ~/.netrc for machine 'data.earthdatahub.destine.eu'.\n"
+            "Register at https://platform.destine.eu/ to obtain a token."
+        ) from None
 
 
 def check_ceda_token() -> str:
