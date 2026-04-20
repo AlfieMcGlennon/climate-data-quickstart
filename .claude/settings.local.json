@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"---EXIT:$?---\")",
+      "WebSearch",
+      "WebFetch(domain:services.ceda.ac.uk)",
+      "WebFetch(domain:help.ceda.ac.uk)",
+      "WebFetch(domain:accounts.ceda.ac.uk)",
+      "Bash(curl -sL \"https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels\" -o /tmp/era5_cds.html)",
+      "Read(//tmp/**)",
+      "WebFetch(domain:cds.climate.copernicus.eu)",
+      "WebFetch(domain:confluence.ecmwf.int)",
+      "WebFetch(domain:rmets.onlinelibrary.wiley.com)",
+      "Read(//c/Users/alfie/**)",
+      "Bash(python -c \"import cdsapi, xarray, matplotlib, cartopy; print\\('cdsapi', cdsapi.__version__\\); print\\('xarray', xarray.__version__\\)\")",
+      "Bash(python -c ':*)",
+      "Bash(python scripts/era5_single_levels_download.py)",
+      "Bash(jupyter nbconvert:*)"
+    ]
+  }
+}

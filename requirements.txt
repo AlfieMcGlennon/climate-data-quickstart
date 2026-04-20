@@ -1,0 +1,21 @@
+# Core dependencies for the climate data toolkit.
+# Per-dataset extras are listed in each dataset's docs/{slug}/README.md.
+
+# Data access
+cdsapi>=0.7.0
+requests>=2.31.0
+
+# Array and tabular data
+xarray>=2024.1.0
+netcdf4>=1.6.5
+numpy>=1.26.0
+pandas>=2.1.0
+
+# Plotting
+matplotlib>=3.8.0
+cartopy>=0.22.0
+
+# Notebooks
+jupyter>=1.0.0
+nbformat>=5.9.0
+nbconvert>=7.10.0
