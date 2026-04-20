@@ -4,11 +4,9 @@ Living document. Update as we go.
 
 ## Current phase
 
-**Phase 0: Scaffolding and first dataset.** Writing the CLAUDE.md, agent
-definitions, and scaffolding the repo structure. First dataset (ERA5 Single Levels)
-will be built autonomously with self-review at each stage to establish the quality
-bar. Once that template is set, subsequent datasets run through the automated
-pipeline with minimal human intervention.
+**Phase complete.** 12 of 14 datasets shipped. UKCP18 and GPWv4 deferred
+until the user registers CEDA and NASA Earthdata accounts respectively.
+Root README.md written.
 
 ## Operating decisions (from kick-off Q&A, 2026-04-19)
 
@@ -36,20 +34,20 @@ Order matters. Each dataset builds on the last for narrative and technical reaso
 
 | # | Slug | Name | Access | Default region | Credentials | Status |
 |---|------|------|--------|----------------|-------------|--------|
-| 1 | era5-single-levels | ERA5 Single Levels | CDS API | UK bbox | ~/.cdsapirc | shipped (8.5/10) |
-| 2 | era5-pressure-levels | ERA5 Pressure Levels | CDS API | UK bbox | ~/.cdsapirc | not started |
-| 3 | era5-land | ERA5-Land | CDS API | UK bbox | ~/.cdsapirc | not started |
-| 4 | era5-daily-stats | ERA5 Daily Statistics | CDS API | UK bbox | ~/.cdsapirc | not started |
-| 5 | earth-data-hub | Earth Data Hub | Custom API | UK bbox | EDH token | not started |
-| 6 | hadcet | HadCET | Direct download | Central England (fixed) | None | not started |
-| 7 | hadcrut5 | HadCRUT5 | Direct download | Global (5 deg grid) | None | not started |
-| 8 | cmip6 | CMIP6 | CDS API | UK bbox | ~/.cdsapirc | not started |
-| 9 | ukcp18 | UKCP18 | CEDA | UK (full) | CEDA token (needed) | blocked: CEDA account |
-| 10 | glofas | GloFAS | CDS API (CEMS) | UK bbox | ~/.cdsapirc | not started |
-| 11 | ghcnd | GHCNd | Direct download | Station list (UK) | None | not started |
-| 12 | e-obs | E-OBS | CDS API | UK bbox | ~/.cdsapirc | not started |
-| 13 | gpw-population | GPWv4 | Direct download | UK bbox | ~/.netrc (Earthdata) | needs Earthdata account |
-| 14 | chirps | CHIRPS | Direct download | East Africa small bbox | None | not started |
+| 1 | era5-single-levels | ERA5 Single Levels | CDS API | UK bbox | ~/.cdsapirc | shipped (factual fixes + polish applied) |
+| 2 | era5-pressure-levels | ERA5 Pressure Levels | CDS API | UK bbox | ~/.cdsapirc | shipped |
+| 3 | era5-land | ERA5-Land | CDS API | UK bbox | ~/.cdsapirc | shipped |
+| 4 | era5-daily-stats | ERA5 Daily Statistics | CDS API | UK bbox | ~/.cdsapirc | shipped |
+| 5 | earth-data-hub | Earth Data Hub | Custom API | UK bbox | EDH token | shipped |
+| 6 | hadcet | HadCET | Direct download | Central England (fixed) | None | shipped |
+| 7 | hadcrut5 | HadCRUT5 | Direct download | Global (5 deg grid) | None | shipped |
+| 8 | cmip6 | CMIP6 | CDS API | UK bbox | ~/.cdsapirc | shipped |
+| 9 | ukcp18 | UKCP18 | CEDA | UK (full) | CEDA token (needed) | deferred: CEDA account not registered |
+| 10 | glofas | GloFAS | CDS API (CEMS) | UK bbox | ~/.cdsapirc | shipped |
+| 11 | ghcnd | GHCNd | Direct download | Station list (UK) | None | shipped |
+| 12 | e-obs | E-OBS | CDS API | UK bbox | ~/.cdsapirc | shipped |
+| 13 | gpw-population | GPWv4 | Direct download | UK bbox | ~/.netrc (Earthdata) | deferred: NASA Earthdata account not registered |
+| 14 | chirps | CHIRPS | Direct download | East Africa small bbox | None | shipped |
 
 ### Order rationale
 
