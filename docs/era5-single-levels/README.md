@@ -31,9 +31,18 @@ models, validating regional models, bias-correcting projections.
 | Update frequency | Daily |
 | Latency | ERA5T approx 5 days behind real time, final ERA5 approx 2 to 3 months behind |
 | Native archive | Reduced Gaussian N320 grid; the CDS pre-interpolates to regular lat/lon |
+| CRS | Decimal degrees on a spherical Earth of radius 6367.47 km (as encoded in GRIB1) |
 
-The 1940-1958 segment is a back-extension and is documented as less reliable
-than the main 1959-present stream, especially before the satellite era.
+The ECMWF-encoded spherical Earth is not identical to WGS84 (EPSG:4326). Most
+tooling reprojects transparently and the difference is sub-kilometre, which is
+smaller than the 31 km grid cell and safe to ignore for typical use. If you are
+co-registering ERA5 with high-resolution observation networks or point-measured
+coordinates where sub-kilometre accuracy matters, be aware of the flag and
+consult the ECMWF spatial reference note
+(https://confluence.ecmwf.int/display/CKB/ERA5%3A+What+is+the+spatial+reference).
+
+The 1940-1958 segment comes from the back extension; see [Known issues](#known-issues)
+below for the caveats that apply to pre-1959 analysis.
 
 ## Variables
 
@@ -103,17 +112,71 @@ The default config pulls one hour of 2 metre temperature over the UK as a
 minimal test. Edit the config block at the top of the script to change
 variables, dates, or region.
 
-### Queue behaviour
+### Queue behaviour and rate limits
 
 Requests are queued server-side. A small single-day request usually completes
 within minutes. Large multi-decade or multi-variable requests can take hours.
 Queue position is visible at https://cds.climate.copernicus.eu/requests.
 
+The CDS shares a finite pool of processing slots across the web form, the API,
+and the Toolbox. The practical guidance from ECMWF is:
+
+- Keep parallel submissions modest. A small number of simultaneous requests
+  from one account is fine; many at once will be throttled.
+- Prefer many small, well-scoped requests over a few very large ones. Large
+  heavy requests are deprioritised in the queue, so splitting into chunks
+  (month by month, variable by variable) usually finishes sooner overall.
+- Concurrency limits and size caps are adjusted by ECMWF according to system
+  load, not published as fixed numbers.
+
+For bulk historical work, particularly at institutional scale, ECMWF points
+advanced users to direct MARS access rather than a separate CDS tier. Before
+submitting a multi-year multi-variable pull, it is also often faster to ask
+around: a colleague or research group may already have the relevant ERA5
+slice on shared storage. See
+https://confluence.ecmwf.int/display/CKB/Climate+Data+Store+%28CDS%29+documentation
+and
+https://confluence.ecmwf.int/display/CKB/Common+Error+Messages+for+CDS+Requests
+for the authoritative guidance.
+
+### Request size and splitting
+
+The CDS enforces a cap on the volume of data and number of fields per
+request. The exact number changes with system load and is not published. The
+cap is applied at submission time, so if a request is too large the API
+returns an error and asks you to split.
+
+A quick way to feel out the current cap: open the dataset on the CDS website,
+tick variables, years, months and hours in the download form, and watch the
+estimated item count at the bottom. Add and remove items until it reports a
+manageable size, then replicate those fields in your API request. ECMWF's
+detailed guidance on splitting long requests is at
+https://confluence.ecmwf.int/display/CKB/Common+Error+Messages+for+CDS+Requests.
+
+The recommended principle is to loop over smaller temporal chunks (e.g., one
+month at a time) rather than submitting one monolithic request. This is
+faster overall because small requests are not deprioritised in the queue.
+
 ### Output formats
 
-GRIB is the default and fastest format. NetCDF4 is also supported via
-`data_format: "netcdf"` but is marked as experimental by the CDS and large
-requests may be split into multiple files.
+GRIB is the default and fastest format; it is the native archive format. NetCDF4
+is also supported via `data_format: "netcdf"` but is marked as experimental by
+the CDS and large requests may be split into multiple files.
+
+### Efficient time-series retrieval
+
+The CDS also publishes a sibling entry specifically for point time-series
+retrievals:
+https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-timeseries
+
+Use it when you want decades of hourly data for one or a few grid points.
+It is a time-chunked repackaging of the same underlying ERA5 data, accessed
+through the same `cdsapi` client (dataset id `reanalysis-era5-single-levels-timeseries`),
+with NetCDF or CSV output. Compared to the standard single-levels endpoint it
+is considerably faster for point queries but does not support bounding-box
+retrieval and exposes only a curated subset of the most common variables. For
+maps, spatial slabs, or any variable outside the curated subset, use the
+standard dataset covered in this entry.
 
 ## ERA5 versus ERA5T
 
@@ -140,14 +203,35 @@ ERA5/ERA5T boundary when final ERA5 supersedes preliminary values.
 - **Snow assimilation errors.** September to December 2021 over central Asia.
   July to November 2024 over the Alps. Incorrect observations were assimilated
   in these windows.
-- **Back extension (1940-1958).** Less reliable than the main stream,
-  particularly before the satellite era. [VERIFY]
+- **Back extension (1940-1978).** The back-extension covers 1940-1978 and is
+  produced as a separate stream from the main 1979-onwards ERA5. Key caveats:
+  - The earlier *preliminary* back extension (also covering 1950-1978)
+    suffered from unrealistically intense tropical cyclones and was withdrawn
+    on 15 August 2023. Any legacy file labelled "preliminary" should not be
+    used; the current final back extension supersedes it.
+  - Users combining the back extension with the main stream should expect
+    small discontinuities around the 1979 join.
+  - Forecast parameters are missing between 00 and 06 UTC on 1 January 1940
+    (except step 0), because the first ERA5 forecast was initialised at
+    06 UTC that day.
+  - Observational input is much sparser before the satellite era (pre-1979),
+    and particularly before the radiosonde network matured around 1958.
+    Analysis increments are small and the fields are closer to the
+    free-running model climate, with reduced trustworthiness in the Southern
+    Hemisphere, the tropics, and over oceans.
+  - A known regional bias affects surface air temperature over Australia
+    prior to about 1970: ERA5 (and JRA-55) show notably higher anomalies
+    than GISTEMP and ACORN-SAT.
+
+  Full caveats are documented at
+  https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation
+  and https://confluence.ecmwf.int/display/CKB/The+family+of+ERA5+datasets.
 
 ## Licence and attribution
 
-Licence: Licence to use Copernicus Products (the "Copernicus licence"). [VERIFY:
-the CDS page references this licence; CC-BY-4.0 is sometimes cited as
-effectively compatible.]
+Licence: Licence to use Copernicus Products. This is the licence name listed
+on the CDS dataset page and the one you accept when the dataset is added to
+your CDS profile.
 
 Full licence text:
 https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
@@ -173,6 +257,10 @@ Reference paper:
 ## Further reading
 
 - CDS dataset page: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+- Time-series sibling dataset: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-timeseries
 - ECMWF ERA5 data documentation: https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation
+- The ERA5 family overview: https://confluence.ecmwf.int/display/CKB/The+family+of+ERA5+datasets
+- ECMWF spatial reference: https://confluence.ecmwf.int/display/CKB/ERA5%3A+What+is+the+spatial+reference
 - How to set up the CDS API: https://cds.climate.copernicus.eu/how-to-api
-- Splitting long requests: https://confluence.ecmwf.int/display/CKB/Climate+Data+Store+%28CDS%29+documentation
+- CDS documentation: https://confluence.ecmwf.int/display/CKB/Climate+Data+Store+%28CDS%29+documentation
+- Common CDS errors and splitting requests: https://confluence.ecmwf.int/display/CKB/Common+Error+Messages+for+CDS+Requests
