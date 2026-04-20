@@ -79,16 +79,19 @@ def check_netrc_entry(machine: str) -> Path:
     return path
 
 
-def check_edh_token() -> str:
+def check_edh_token() -> str | None:
     """Verify an Earth Data Hub access token is configured.
 
-    EDH authenticates via ``~/.netrc`` or via the ``EDH_API_KEY`` environment
-    variable. This check prefers the env var, then falls back to a
-    ``~/.netrc`` entry for ``data.earthdatahub.destine.eu``.
+    EDH authenticates via ``~/.netrc`` or via the ``EDH_API_KEY``
+    environment variable. This check prefers the env var, then falls
+    back to verifying a ``~/.netrc`` entry exists for
+    ``data.earthdatahub.destine.eu``.
 
     Returns:
-        The token if available from env var, else a placeholder string
-        indicating that ``~/.netrc`` is configured.
+        The token string if configured via ``EDH_API_KEY``; ``None`` if
+        credentials are configured via ``~/.netrc`` (in which case they
+        are read by the underlying HTTP client rather than returned
+        here).
 
     Raises:
         FileNotFoundError: If no token is configured via either mechanism.
@@ -97,10 +100,10 @@ def check_edh_token() -> str:
     if env_token:
         return env_token
 
-    # Fall back to .netrc
+    # Fall back to .netrc; check_netrc_entry raises if not present
     try:
         check_netrc_entry("data.earthdatahub.destine.eu")
-        return "<token in ~/.netrc>"
+        return None
     except FileNotFoundError:
         raise FileNotFoundError(
             "Earth Data Hub token not found.\n"

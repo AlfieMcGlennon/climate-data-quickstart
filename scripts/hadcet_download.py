@@ -47,15 +47,47 @@ def _url_for(resolution: str, statistic: str) -> str:
     return f"{HADLEY_BASE}/{statistic}temp_{resolution}_totals.txt"
 
 
+def _find_data_start(lines: list[str], expected_columns: int) -> int:
+    """Find the first line that looks like a data row, not a header.
+
+    A data row is one that starts with a 4-digit year and has at least
+    ``expected_columns`` whitespace-separated tokens. This rejects header
+    lines like "1659-1973 Manley..." that happen to start with four
+    digits but lack the numeric columns.
+    """
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if len(stripped) < 4 or not stripped[:4].isdigit():
+            continue
+        tokens = stripped.split()
+        if len(tokens) >= expected_columns and all(
+            _is_numeric_token(t) for t in tokens[:expected_columns]
+        ):
+            return i
+    raise RuntimeError("Could not locate the start of the HadCET data table.")
+
+
+def _is_numeric_token(token: str) -> bool:
+    """True if a token is an integer, float, or negative value (e.g. -99.9)."""
+    try:
+        float(token)
+        return True
+    except ValueError:
+        return False
+
+
 def _parse_monthly(text: str):
-    """Parse a HadCET monthly totals file into a tidy long-format DataFrame."""
+    """Parse a HadCET monthly totals file into a tidy long-format DataFrame.
+
+    Monthly files are whitespace-delimited with one row per year: a
+    year column followed by 12 monthly values and an annual mean.
+    Missing values are encoded as ``-99.9``.
+    """
     import pandas as pd
 
     lines = text.splitlines()
-    data_start = next(
-        i for i, line in enumerate(lines)
-        if len(line.strip()) >= 4 and line.strip()[:4].isdigit()
-    )
+    # Expect 14 columns: year + 12 months + annual
+    data_start = _find_data_start(lines, expected_columns=14)
     cols = [
         "year", "jan", "feb", "mar", "apr", "may", "jun",
         "jul", "aug", "sep", "oct", "nov", "dec", "ann",
@@ -70,7 +102,13 @@ def _parse_monthly(text: str):
         .melt(id_vars="year", var_name="month_name", value_name="temperature_degC")
     )
     long["month"] = long["month_name"].map(months)
-    long["date"] = pd.to_datetime(dict(year=long["year"], month=long["month"], day=1))
+    # Use datetime64[s] precision rather than the default ns, because ns
+    # only spans 1677-2262. HadCET monthly data starts in 1659.
+    long["date"] = _ymd_to_datetime(
+        long["year"].astype(int).to_numpy(),
+        long["month"].astype(int).to_numpy(),
+        1,
+    )
     long = (
         long[long["temperature_degC"] > -99]
         .sort_values("date")
@@ -80,22 +118,62 @@ def _parse_monthly(text: str):
     return long
 
 
+def _ymd_to_datetime(years, months, days):
+    """Build a numpy datetime64[D] array from year/month/day arrays.
+
+    This avoids the pandas default datetime64[ns] range (1677-2262) so
+    we can represent dates back to 1659.
+    """
+    import numpy as np
+
+    if isinstance(days, int):
+        iso = [f"{int(y):04d}-{int(m):02d}-{int(days):02d}" for y, m in zip(years, months)]
+    else:
+        iso = [
+            f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
+            for y, m, d in zip(years, months, days)
+        ]
+    return np.array(iso, dtype="datetime64[D]")
+
+
 def _parse_daily(text: str):
-    """Parse a HadCET daily totals file into a tidy DataFrame."""
+    """Parse a HadCET daily totals file into a tidy DataFrame.
+
+    Current Met Office format: two whitespace-separated columns
+    ``Date Value`` with Date as ISO 8601 ``YYYY-MM-DD`` and Value as a
+    decimal temperature or ``-99.9`` for missing.
+    """
     import pandas as pd
+    import numpy as np
 
     lines = text.splitlines()
-    data_start = next(
-        i for i, line in enumerate(lines)
-        if len(line.strip()) >= 4 and line.strip()[:4].isdigit()
-    )
+    # Find the first line that matches a YYYY-MM-DD start.
+    data_start = None
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if len(stripped) >= 10 and stripped[4] == "-" and stripped[7] == "-":
+            try:
+                int(stripped[:4])
+                int(stripped[5:7])
+                int(stripped[8:10])
+                data_start = i
+                break
+            except ValueError:
+                continue
+    if data_start is None:
+        raise RuntimeError("Could not locate the start of the HadCET daily data table.")
+
     df = pd.read_csv(
         io.StringIO("\n".join(lines[data_start:])),
         sep=r"\s+", header=None,
-        names=["year", "month", "day", "temperature_degC"],
+        names=["date_str", "temperature_degC"],
         engine="python",
     )
-    df["date"] = pd.to_datetime(df[["year", "month", "day"]])
+    # datetime64[D] avoids the pandas ns precision limit for pre-1677 dates.
+    df["date"] = np.array(df["date_str"].tolist(), dtype="datetime64[D]")
+    df["year"] = df["date_str"].str.slice(0, 4).astype(int)
+    df["month"] = df["date_str"].str.slice(5, 7).astype(int)
+    df["day"] = df["date_str"].str.slice(8, 10).astype(int)
     df = (
         df[df["temperature_degC"] > -99]
         .sort_values("date")

@@ -50,21 +50,24 @@ repo).
 
 ## Files available
 
-Files live under https://www.metoffice.gov.uk/hadobs/hadcrut5/data/current/.
-The current sub-version at writing is `5.0.2.0`; pin it in reproducible
-pipelines.
+Files live under `https://www.metoffice.gov.uk/hadobs/hadcrut5/data/HadCRUT.<VERSION>/`.
+The current sub-version at writing is `5.1.0.0`; pin it in reproducible
+pipelines. Check the HadCRUT5 landing page for the latest version.
 
-| Product | URL |
+Files are split by whether they are infilled (under `analysis/`) or
+non-infilled (under `non-infilled/`), with per-region summary time series
+under `.../diagnostics/`.
+
+| Product | Path (relative to `/data/HadCRUT.5.1.0.0/`) |
 |---|---|
-| Ensemble mean, non-infilled | `.../analysis/HadCRUT.5.0.2.0.analysis.anomalies.ensemble_mean.nc` |
-| Ensemble mean, infilled | `.../analysis/HadCRUT.5.0.2.0.analysis.anomalies.ensemble_mean.infilled.nc` |
-| Ensemble members (200 x non-infilled) | `.../analysis/HadCRUT.5.0.2.0.analysis.anomalies.<N>.nc` (N=1..200) |
-| Ensemble members (200 x infilled) | `.../analysis/HadCRUT.5.0.2.0.analysis.anomalies.<N>.infilled.nc` |
-| Global monthly time series (CSV) | `.../analysis/diagnostics/HadCRUT.5.0.2.0.analysis.summary_series.global.monthly.csv` |
-| Global annual time series (CSV) | `.../analysis/diagnostics/HadCRUT.5.0.2.0.analysis.summary_series.global.annual.csv` |
+| Ensemble mean, infilled (recommended for maps) | `analysis/HadCRUT.5.1.0.0.analysis.anomalies.ensemble_mean.nc` |
+| Ensemble mean, non-infilled (gaps where obs sparse) | `non-infilled/HadCRUT.5.1.0.0.noninfilled.anomalies.ensemble_mean.nc` |
+| Global monthly time series, infilled (NetCDF) | `analysis/diagnostics/HadCRUT.5.1.0.0.analysis.summary_series.global.monthly.nc` |
+| Global annual time series, infilled (NetCDF) | `analysis/diagnostics/HadCRUT.5.1.0.0.analysis.summary_series.global.annual.nc` |
 
-Ensemble-mean files are a few tens of MB. Full 200-member ensembles are a
-few GB each.
+Ensemble-mean NetCDFs are about 30 to 40 MB. 200-member ensemble files
+exist but are not listed on the default download page; contact the Met
+Office if you need them.
 
 ## Get data in 5 minutes
 
@@ -104,7 +107,7 @@ Published by the Met Office Hadley Centre and CRU UEA under the UK Open
 Government Licence. Commercial use is permitted with attribution.
 Suggested line:
 
-> HadCRUT.5.0.2.0 data were obtained from
+> HadCRUT.5.1.0.0 data were obtained from
 > https://www.metoffice.gov.uk/hadobs/hadcrut5 on [date] and are British
 > Crown Copyright, Met Office, and (c) Climatic Research Unit, University
 > of East Anglia, provided under the Open Government Licence.

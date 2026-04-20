@@ -75,11 +75,18 @@ def download() -> Path:
         storage_options={"client_kwargs": {"trust_env": True}},
     )
 
+    # Normalise longitude to -180..180 if the store uses 0..360, then
+    # sortby to guarantee the .sel slice works regardless of axis
+    # direction.
+    if float(ds["longitude"].max()) > 180:
+        ds = ds.assign_coords(longitude=(((ds["longitude"] + 180) % 360) - 180))
+    ds = ds.sortby("latitude").sortby("longitude")
+
     # Subset to the region and time window we want. Nothing is downloaded yet;
     # the lazy slice defines the byte-ranges that will be fetched on compute.
     subset = ds[VARIABLE].sel(
         time=slice(TIME_START, TIME_END),
-        latitude=slice(LAT_NORTH, LAT_SOUTH),
+        latitude=slice(LAT_SOUTH, LAT_NORTH),
         longitude=slice(LON_WEST, LON_EAST),
     )
 

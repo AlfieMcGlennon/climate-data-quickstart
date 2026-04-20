@@ -19,7 +19,10 @@
       "Bash(curl -sL -A \"Mozilla/5.0\" \"https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation\" -o /tmp/era5_doc.html)",
       "Bash(echo \"exit:$?\")",
       "WebFetch(domain:codes.ecmwf.int)",
-      "WebFetch(domain:forum.ecmwf.int)"
+      "WebFetch(domain:forum.ecmwf.int)",
+      "Bash(curl -sL --max-time 30 \"https://hadleyserver.metoffice.gov.uk/hadcet/data/meantemp_monthly_totals.txt\")",
+      "Bash(curl -sL --max-time 60 --verbose \"https://hadleyserver.metoffice.gov.uk/hadcet/data/meantemp_monthly_totals.txt\" -o /tmp/hadcet_test.txt)",
+      "Bash(python:*)"
     ]
   }
 }
