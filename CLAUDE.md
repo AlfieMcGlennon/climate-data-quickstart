@@ -11,6 +11,31 @@ Each dataset in the repo gets three artefacts:
 2. A download script with a standard config block at the top
 3. A quickstart notebook that demonstrates a small, successful end-to-end pull
 
+## Tone and scope
+
+This repo is a **quickstart**, not a reference manual. Each dataset's
+`docs/{slug}/README.md` should be ~150-250 lines in total, not 400. Rules of
+thumb:
+
+- **Point to primary sources, do not duplicate them.** If ECMWF or the dataset
+  provider has a page on something (grid encoding, queue behaviour, full
+  variable catalogue), link to it with one sentence of context, do not
+  reproduce it.
+- **The notebook is the recipe.** Long "how to aggregate to daily" code
+  blocks in the docs belong in the notebook, or nowhere.
+- **Top 10 variables in the README is enough.** `variables.md` should be a
+  short pointer plus a quick-reference of common variables, not a full
+  catalogue re-keyed from the provider's own list.
+- **Scope note at the top** framing the page as a getting-started resource
+  (one short blockquote).
+- **Gotchas section** is allowed but one line each with a link; no deep
+  dives.
+- **No glossary, no recipes section, no deep CRS/grid/encoding essays.**
+  If someone needs that depth, they should be on the ECMWF Confluence.
+
+ERA5 single levels is the reference template but sits at the heavy end of
+acceptable length; subsequent datasets should land lighter.
+
 ## Style rules
 
 - No em dashes anywhere. Use hyphens, commas, or restructure the sentence.
