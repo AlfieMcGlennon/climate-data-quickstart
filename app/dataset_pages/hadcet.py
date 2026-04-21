@@ -13,7 +13,7 @@ def render_form() -> dict:
     st.markdown(
         "Central England Temperature: monthly from 1659, daily from 1772. "
         "The longest instrumental temperature record in the world. "
-        "[Full docs](docs/hadcet/README.md)."
+        "See `docs/hadcet/README.md` in the repo for full reference."
     )
 
     resolution = st.radio("Resolution", ["monthly", "daily"], horizontal=True)

@@ -47,7 +47,7 @@ def render_form() -> dict:
     st.markdown(
         "Multi-model CMIP6 projections via the CDS. "
         "One model, one scenario per request is the simplest start. "
-        "[Full docs](docs/cmip6/README.md)."
+        "See `docs/cmip6/README.md` in the repo for full reference."
     )
     st.info(
         "For research-grade ensemble work, `intake-esm` with the Pangeo Zarr "

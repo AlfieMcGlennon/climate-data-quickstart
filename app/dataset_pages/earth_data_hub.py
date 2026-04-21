@@ -54,9 +54,9 @@ def render_form() -> dict:
         "Stream climate data from Earth Data Hub via xarray + Zarr. "
         "Same underlying ERA5 data as the CDS entries above, but accessed "
         "**lazily** rather than downloaded as a whole file. "
-        "[Full docs](docs/earth-data-hub/README.md)."
+        "See `docs/earth-data-hub/README.md` in the repo for full reference."
     )
-    st.info(
+    st.caption(
         "EDH is a streaming service, not a queued download service. When you "
         "open the store, only the coordinate metadata travels over the wire. "
         "Bytes are fetched only when you reduce, plot, or save the slice."

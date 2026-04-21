@@ -33,7 +33,7 @@ def render_form() -> dict:
     st.markdown(
         "Hourly ERA5 reanalysis on single (surface/near-surface) levels. "
         "Global, 0.25 deg, 1940-present. "
-        "[Full docs](docs/era5-single-levels/README.md)."
+        "See `docs/era5-single-levels/README.md` in the repo for full reference."
     )
 
     variables = st.multiselect(

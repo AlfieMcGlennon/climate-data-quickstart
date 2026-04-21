@@ -32,7 +32,7 @@ COMMON_VARIABLES = [
 def render_form() -> dict:
     st.markdown(
         "Hourly ERA5-Land reanalysis at 0.1 deg (~9 km), land-only, 1950-present. "
-        "[Full docs](docs/era5-land/README.md)."
+        "See `docs/era5-land/README.md` in the repo for full reference."
     )
 
     variables = st.multiselect(

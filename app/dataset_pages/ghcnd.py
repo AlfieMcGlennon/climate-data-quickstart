@@ -25,7 +25,7 @@ ELEMENTS = ["TMAX", "TMIN", "TAVG", "PRCP", "SNOW", "SNWD"]
 def render_form() -> dict:
     st.markdown(
         "Daily weather-station observations from NOAA. "
-        "100,000+ stations worldwide. [Full docs](docs/ghcnd/README.md)."
+        "100,000+ stations worldwide. See `docs/ghcnd/README.md` in the repo for full reference."
     )
 
     label = st.selectbox("Station", list(UK_STATIONS.keys()))

@@ -54,12 +54,11 @@ def _netrc_has(machine: str) -> bool:
 
 
 def _netrc_location_hint() -> str:
-    """Return a friendly description of which netrc file was found (if any)."""
+    """Return a friendly, user-agnostic description of the netrc file."""
     for path in _netrc_paths():
         if path.exists():
-            return str(path)
-    # Neither exists: suggest the native one for this OS
-    return str(_netrc_paths()[1] if Path.home().drive else _netrc_paths()[0])
+            return f"~/{path.name}"
+    return "~/_netrc" if Path.home().drive else "~/.netrc"
 
 
 def check_cds() -> CredentialStatus:
@@ -67,7 +66,7 @@ def check_cds() -> CredentialStatus:
     path = Path.home() / ".cdsapirc"
     return CredentialStatus(
         configured=path.exists(),
-        location=str(path),
+        location="~/.cdsapirc",
         registration_url="https://cds.climate.copernicus.eu/",
         instructions=(
             "Register at the URL above, accept the licence for the dataset "
@@ -126,7 +125,7 @@ def check_ceda() -> CredentialStatus:
     path = Path.home() / ".ceda_token"
     return CredentialStatus(
         configured=via_env or path.exists(),
-        location="CEDA_TOKEN env var" if via_env else str(path),
+        location="CEDA_TOKEN env var" if via_env else "~/.ceda_token",
         registration_url="https://services.ceda.ac.uk/cedasite/register/info/",
         instructions=(
             "Register at the URL above, generate a bearer token at "
@@ -168,6 +167,11 @@ DATASET_REQUIREMENTS: dict[str, tuple[str, ...]] = {
     "e-obs": ("cds",),
     "gpw-population": ("earthdata",),
     "chirps": (),
+    "ecmwf-open-data": (),
+    "c3s-seasonal": ("cds",),
+    "arco-era5": (),
+    "edh-explorer": ("edh",),
+    "esgf-cmip6": (),
 }
 
 

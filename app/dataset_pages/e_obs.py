@@ -18,7 +18,7 @@ VARIABLES = [
 def render_form() -> dict:
     st.markdown(
         "European gridded daily observations from the ECA&D station network. "
-        "[Full docs](docs/e-obs/README.md)."
+        "See `docs/e-obs/README.md` in the repo for full reference."
     )
     st.warning(
         "The CDS returns the WHOLE 1950-present history in a single file. "

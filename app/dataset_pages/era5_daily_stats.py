@@ -27,7 +27,7 @@ def render_form() -> dict:
     st.markdown(
         "Pre-computed daily aggregates of ERA5 single levels. "
         "Roughly 24x smaller than pulling hourly data and resampling yourself. "
-        "[Full docs](docs/era5-daily-stats/README.md)."
+        "See `docs/era5-daily-stats/README.md` in the repo for full reference."
     )
 
     variables = st.multiselect("Variables", VARIABLES, default=["2m_temperature"])

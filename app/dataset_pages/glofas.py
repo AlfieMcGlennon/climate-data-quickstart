@@ -13,7 +13,7 @@ SLUG = "glofas"
 def render_form() -> dict:
     st.markdown(
         "Daily global river discharge reanalysis from GloFAS. "
-        "[Full docs](docs/glofas/README.md)."
+        "See `docs/glofas/README.md` in the repo for full reference."
     )
     st.warning(
         "GloFAS is on the Copernicus CEMS Early Warning Data Store (EWDS), "

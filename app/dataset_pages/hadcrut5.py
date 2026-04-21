@@ -12,7 +12,7 @@ SLUG = "hadcrut5"
 def render_form() -> dict:
     st.markdown(
         "Global monthly temperature anomalies on a 5 deg grid, 1850-present. "
-        "[Full docs](docs/hadcrut5/README.md)."
+        "See `docs/hadcrut5/README.md` in the repo for full reference."
     )
 
     sub_version = st.text_input(

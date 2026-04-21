@@ -12,7 +12,7 @@ SLUG = "chirps"
 def render_form() -> dict:
     st.markdown(
         "Quasi-global daily rainfall from UCSB Climate Hazards Center. "
-        "[Full docs](docs/chirps/README.md)."
+        "See `docs/chirps/README.md` in the repo for full reference."
     )
     st.warning(
         "CHIRPS covers 50 S to 50 N only. The UK is outside coverage. "

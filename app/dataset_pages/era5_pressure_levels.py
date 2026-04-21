@@ -35,7 +35,7 @@ PRESSURE_LEVELS = [
 def render_form() -> dict:
     st.markdown(
         "Hourly ERA5 reanalysis on 37 pressure levels (1 to 1000 hPa). "
-        "[Full docs](docs/era5-pressure-levels/README.md)."
+        "See `docs/era5-pressure-levels/README.md` in the repo for full reference."
     )
 
     variables = st.multiselect("Variables", VARIABLES, default=["temperature"])
