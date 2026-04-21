@@ -1,158 +1,162 @@
 # Climate data quickstart
 
-A curated, practical reference for climate and weather datasets. One
-entry per dataset: a docs page you can read in ten minutes, a download
-script you can copy, and a quickstart notebook that pulls a small
-example end-to-end.
+A local desktop app and script library for downloading, streaming, and
+exploring climate and weather datasets. Pick a dataset from a form, fill
+in a few fields, click Download. No code required for the app; scripts
+and notebooks are there if you want to see how it works or build your
+own pipeline.
 
-Aimed at MSc/PhD students, early-career climate scientists, and climate
-risk analysts who want to get going on a real dataset without reading
-the full provider documentation first.
+Built for MSc/PhD students, early-career climate scientists, and anyone
+who has spent too long reading provider docs before pulling their first
+file.
 
-## Datasets
+## Quick start
 
-| # | Dataset | Coverage | Access | Notebook |
-|---|---|---|---|---|
-| 1 | [ERA5 single levels](docs/era5-single-levels/README.md) | Global, hourly, 1940-present, 0.25 deg | CDS API | [notebook](notebooks/era5_single_levels_quickstart.ipynb) |
-| 2 | [ERA5 pressure levels](docs/era5-pressure-levels/README.md) | Global, hourly, 37 pressure levels | CDS API | [notebook](notebooks/era5_pressure_levels_quickstart.ipynb) |
-| 3 | [ERA5-Land](docs/era5-land/README.md) | Land-only, hourly, 0.1 deg, 1950-present | CDS API | [notebook](notebooks/era5_land_quickstart.ipynb) |
-| 4 | [ERA5 daily statistics](docs/era5-daily-stats/README.md) | Pre-computed daily aggregates of ERA5 | CDS API | [notebook](notebooks/era5_daily_stats_quickstart.ipynb) |
-| 5 | [Earth Data Hub](docs/earth-data-hub/README.md) | Streaming ERA5, CMIP6, DEM via Zarr | xarray + zarr | [notebook](notebooks/earth_data_hub_quickstart.ipynb) |
-| 6 | [HadCET](docs/hadcet/README.md) | Central England, monthly since 1659 | Direct download | [notebook](notebooks/hadcet_quickstart.ipynb) |
-| 7 | [HadCRUT5](docs/hadcrut5/README.md) | Global, monthly, 5 deg, 1850-present | Direct download | [notebook](notebooks/hadcrut5_quickstart.ipynb) |
-| 8 | [CMIP6](docs/cmip6/README.md) | Multi-model climate projections, SSPs | CDS API | [notebook](notebooks/cmip6_quickstart.ipynb) |
-| 9 | UKCP18 | UK high-resolution projections | CEDA | deferred (needs CEDA account) |
-| 10 | [GloFAS historical](docs/glofas/README.md) | Global daily river discharge, 1979-present | CEMS EWDS | [notebook](notebooks/glofas_quickstart.ipynb) |
-| 11 | [GHCNd](docs/ghcnd/README.md) | Daily station observations, ~100k stations | Direct download | [notebook](notebooks/ghcnd_quickstart.ipynb) |
-| 12 | [E-OBS](docs/e-obs/README.md) | European gridded daily observations | CDS API | [notebook](notebooks/e_obs_quickstart.ipynb) |
-| 13 | GPWv4 | Global gridded population | NASA Earthdata | deferred (needs Earthdata account) |
-| 14 | [CHIRPS](docs/chirps/README.md) | Tropical-subtropical daily precipitation | Direct download | [notebook](notebooks/chirps_quickstart.ipynb) |
+You need Python 3.10+ installed. That is the only prerequisite.
 
-## Two ways to use it
+**Windows:**
 
-1. **Local desktop app** (easiest): pick a dataset from a form, fill in a
-   few fields, click Download. Runs entirely on your machine via
-   Streamlit; your API keys are read from your standard config files and
-   never touched by the app itself. See the "Using the app" section below.
-2. **Scripts and notebooks** (for learning or scripting): each dataset
-   ships with a Python download script and a quickstart notebook. Use
-   these when you want to see how the API calls work, or build the
-   dataset into your own pipeline.
+```
+git clone https://github.com/your-username/climate-data-quickstart.git
+cd climate-data-quickstart
+setup.bat
+```
 
-## Using the app
+**macOS / Linux:**
 
-### First-time setup
+```bash
+git clone https://github.com/your-username/climate-data-quickstart.git
+cd climate-data-quickstart
+chmod +x setup.sh && ./setup.sh
+```
 
-1. Install Python 3.10+ and clone this repo.
-2. Set up credentials for the datasets you plan to use (see
-   [Credentials](#credentials) below).
-3. From the repo root, run:
-   - Windows: double-click `setup.bat`
-   - macOS/Linux: `./setup.sh`
-   - Alternative (conda users): `conda env create -f environment.yml`
+**Conda users:**
 
-This creates a `.venv/` and installs everything the app needs.
+```bash
+conda env create -f environment.yml
+conda activate climate-data-quickstart
+streamlit run app/main.py
+```
 
-### Daily use
+Setup creates a `.venv/`, installs everything, and takes 2-3 minutes.
+Then launch the app:
 
-Launch the app:
 - Windows: double-click `run_app.bat`
 - macOS/Linux: `./run_app.sh`
 
-Your browser will open at `http://localhost:8501`. Pick a dataset from
-the sidebar, fill in the form, click Download. The output file appears
-in the folder shown on the results panel.
+Your browser opens at `http://localhost:8501`. Pick a dataset, configure
+a small request, click Download.
 
-### Safety
+## Datasets
 
-The app runs locally and binds only to `localhost`. It does not read or
-store your credential strings: the underlying libraries (`cdsapi`,
-`requests` with `~/.netrc`, Earth Data Hub's Zarr client) read your
-credentials directly from the standard files exactly as they would when
-you invoke a script from the command line.
+17 datasets across five categories:
 
-### Scripts only
+| # | Dataset | Coverage | Access | Docs |
+|---|---------|----------|--------|------|
+| 1 | ERA5 single levels | Global, hourly, 0.25 deg, 1940-present | CDS API | [docs](docs/era5-single-levels/README.md) |
+| 2 | ERA5 pressure levels | Global, hourly, 37 pressure levels | CDS API | [docs](docs/era5-pressure-levels/README.md) |
+| 3 | ERA5-Land | Land-only, hourly, 0.1 deg, 1950-present | CDS API | [docs](docs/era5-land/README.md) |
+| 4 | ERA5 daily statistics | Pre-computed daily mean/max/min | CDS API | [docs](docs/era5-daily-stats/README.md) |
+| 5 | Earth Data Hub | Stream ERA5/CMIP6 via Zarr, no queue | Zarr | [docs](docs/earth-data-hub/README.md) |
+| 6 | ARCO-ERA5 | ERA5 on Google Cloud, no API key needed | Zarr | [docs](docs/arco-era5/README.md) |
+| 7 | EDH catalogue explorer | Browse ERA5 + CMIP6 models from EDH | Zarr | - |
+| 8 | CMIP6 (CDS) | Curated subset of climate projections | CDS API | [docs](docs/cmip6/README.md) |
+| 9 | ESGF CMIP6 | Full archive, every model and experiment | Direct HTTP | [docs](docs/esgf-cmip6/README.md) |
+| 10 | C3S seasonal | Multi-system forecasts, up to 6 months ahead | CDS API | [docs](docs/c3s-seasonal/README.md) |
+| 11 | HadCET | Central England temperature, 1659-present | Direct HTTP | [docs](docs/hadcet/README.md) |
+| 12 | HadCRUT5 | Global temperature anomalies, 1850-present | Direct HTTP | [docs](docs/hadcrut5/README.md) |
+| 13 | GHCNd | 100,000+ weather stations, daily records | Direct HTTP | [docs](docs/ghcnd/README.md) |
+| 14 | E-OBS | European gridded daily observations | CDS API | [docs](docs/e-obs/README.md) |
+| 15 | CHIRPS | Satellite-station rainfall blend, tropics | Direct HTTP | [docs](docs/chirps/README.md) |
+| 16 | ECMWF Open Data | Real-time IFS/AIFS, four times daily | Direct HTTP | [docs](docs/ecmwf-open-data/README.md) |
+| 17 | GloFAS | Global river discharge reanalysis | EWDS API | [docs](docs/glofas/README.md) |
 
-If you just want the scripts and notebooks without the app:
+## What the app does
+
+- **Download** any of the 17 datasets with a form instead of writing API calls
+- **Stream** ERA5 and CMIP6 data lazily via Zarr (no queue, no file download)
+- **Explore** any NetCDF, GRIB, or CSV file with interactive maps and time series
+- **Compare** CMIP6 models side by side or plot ensemble member spread from ESGF
+- **Search** datasets by topic (temperature, wind, precipitation, flood, Europe, forecast)
+
+Everything runs locally. The app never reads or stores your API keys -
+it uses the same credential files as the command-line scripts
+(`~/.cdsapirc`, `~/.netrc`).
+
+## Credentials
+
+Some datasets are open (HadCET, CHIRPS, ARCO-ERA5, ESGF, ECMWF Open Data).
+The rest need a free API key. The app shows which credentials you have and
+which are missing in the sidebar.
+
+| Provider | Datasets | Where to register | Key file |
+|----------|----------|-------------------|----------|
+| Copernicus CDS | ERA5 (all), CMIP6, E-OBS, C3S seasonal | [cds.climate.copernicus.eu](https://cds.climate.copernicus.eu/) | `~/.cdsapirc` |
+| Copernicus EWDS | GloFAS | [ewds.climate.copernicus.eu](https://ewds.climate.copernicus.eu/) | `EWDS_KEY` env var |
+| Earth Data Hub | EDH, EDH explorer | [platform.destine.eu](https://platform.destine.eu/) | `~/.netrc` |
+| None needed | HadCET, HadCRUT5, GHCNd, CHIRPS, ARCO-ERA5, ECMWF Open Data, ESGF CMIP6 | - | - |
+
+Each dataset's docs page has step-by-step credential setup instructions.
+
+## Scripts only (no app)
+
+If you just want the download scripts and notebooks:
 
 ```bash
 pip install -r requirements.txt
 python scripts/era5_single_levels_download.py
 ```
 
-Each dataset's docs page lists the per-dataset extras (for example
-`cfgrib` and `eccodes` for GloFAS GRIB output).
-
-## Credentials
-
-Datasets fall into three access patterns:
-
-- **Copernicus CDS** (ERA5 family, CMIP6, E-OBS): free account at
-  https://cds.climate.copernicus.eu/, Personal Access Token saved to
-  `~/.cdsapirc`.
-- **Copernicus CEMS EWDS** (GloFAS): separate account at
-  https://ewds.climate.copernicus.eu/, token via the `EWDS_KEY`
-  environment variable.
-- **Earth Data Hub** (streaming ERA5, CMIP6): free DestinE account at
-  https://platform.destine.eu/, token in `~/.netrc` for
-  `data.earthdatahub.destine.eu`.
-- **Direct download** (HadCET, HadCRUT5, GHCNd, CHIRPS): no credentials
-  needed.
-- **CEDA** (UKCP18): free account at https://services.ceda.ac.uk/cedasite/register/info/;
-  OAuth token for programmatic access. UKCP18 is deferred in this repo
-  pending registration.
-- **NASA Earthdata** (GPWv4): free account at https://urs.earthdata.nasa.gov/;
-  credentials via `~/.netrc`. GPWv4 is deferred in this repo pending
-  registration.
-
-Each dataset's docs page walks through the steps for its pattern.
-
-## Quickstart (5 minutes)
-
-Pick a dataset and follow its README. For ERA5, the fastest path is:
-
-1. Register at https://cds.climate.copernicus.eu/ and accept the ERA5
-   licence in your profile.
-2. Save your Personal Access Token to `~/.cdsapirc` per
-   https://cds.climate.copernicus.eu/how-to-api.
-3. `pip install -r requirements.txt`
-4. Open `notebooks/era5_single_levels_quickstart.ipynb` and run every
-   cell. Default config pulls one hour of 2 m temperature over the UK
-   (~30 kB, under a minute).
+Each script has a config block at the top you can edit. Each notebook
+runs top-to-bottom after you set the config block and have the right
+credentials.
 
 ## Project structure
 
 ```
 climate-data-quickstart/
-├── CLAUDE.md              # Project rules and style guide
-├── PLAN.md                # Working plan, dataset queue, status
-├── README.md              # This file
-├── requirements.txt       # Core Python dependencies
-├── common/                # Shared helpers (credentials, plotting)
-├── docs/                  # Per-dataset README and variables.md
-├── notebooks/             # Per-dataset quickstart .ipynb
-├── scripts/               # Per-dataset download script
-└── .claude/               # Agent definitions and skill (for Claude Code users)
+  setup.bat / setup.sh       # One-time setup (creates .venv, installs deps)
+  run_app.bat / run_app.sh   # Launch the Streamlit app
+  requirements.txt           # Python dependencies (pip)
+  environment.yml            # Python dependencies (conda)
+  app/                       # Streamlit app source
+  scripts/                   # Per-dataset download scripts
+  notebooks/                 # Per-dataset quickstart notebooks
+  docs/                      # Per-dataset documentation
+  common/                    # Shared helpers
 ```
 
-## Scope note
+## Troubleshooting
 
-This is a getting-started resource. Each dataset page points to the
-authoritative primary documentation (ECMWF Confluence, Met Office Hadley
-Centre, NOAA NCEI, and so on). If you are doing research-grade analysis
-you should follow those links for the technical detail this repo keeps
-short.
+**Cartopy fails to install (macOS/Linux).** Cartopy needs the GEOS and
+PROJ C libraries. If `pip install` fails with compilation errors, use
+conda instead:
 
-## Contributions
+```bash
+conda env create -f environment.yml
+conda activate climate-data-quickstart
+streamlit run app/main.py
+```
 
-Issues and pull requests welcome. The style rules (British English, no
-em dashes, no marketing speak, primary sources only) are in
-[`CLAUDE.md`](CLAUDE.md).
+**CDS request hangs.** Copernicus CDS requests are queued server-side
+and can take minutes to hours during busy periods. The app shows a
+status message while waiting. Check queue status at
+https://cds.climate.copernicus.eu/live/queue.
 
-## Licence of this repository
+**GRIB files won't open.** Make sure `cfgrib` and `eccodes` are
+installed. On conda: `conda install -c conda-forge cfgrib eccodes`.
+On pip: `pip install cfgrib eccodes`. The `eccodes` pip package needs
+the ecCodes C library installed separately on some systems.
 
-The code, scripts, and docs in this repository are released under the
-MIT licence. The datasets themselves have their own licences; each
-dataset's README notes the licence and attribution requirements.
+## Safety
 
-See [LICENSE](LICENSE) for the full text.
+The app binds only to `localhost`. The underlying libraries (`cdsapi`,
+`requests` with `~/.netrc`, xarray with Zarr) read your credentials
+directly from the standard files exactly as they would from a script.
+Nothing is sent anywhere except the data provider's API.
+
+## Licence
+
+The code in this repository is released under the MIT licence. The
+datasets themselves have their own licences; each dataset's README
+notes the licence and attribution requirements. See [LICENSE](LICENSE).

@@ -4,6 +4,7 @@
 # Data access
 cdsapi>=0.7.0
 requests>=2.31.0
+ecmwf-opendata>=0.3.0
 
 # Array and tabular data
 xarray>=2024.1.0
@@ -14,6 +15,7 @@ pandas>=2.1.0
 # Plotting
 matplotlib>=3.8.0
 cartopy>=0.22.0
+nc-time-axis>=1.4.0
 
 # Notebooks
 jupyter>=1.0.0
@@ -23,11 +25,12 @@ nbconvert>=7.10.0
 # App: local Streamlit UI
 streamlit>=1.30.0
 
-# Earth Data Hub (streaming Zarr)
+# Earth Data Hub and ARCO-ERA5 (streaming Zarr)
 zarr>=2.16.0
 fsspec>=2024.1.0
 aiohttp>=3.9.0
+gcsfs>=2024.1.0
 
-# GRIB reading (for GloFAS etc.)
+# GRIB reading (for GloFAS, ECMWF Open Data)
 cfgrib>=0.9.10.0
 eccodes>=1.6.0
