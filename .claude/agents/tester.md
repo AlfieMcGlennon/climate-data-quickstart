@@ -17,9 +17,11 @@ correctly against the real data source.
 - Verify `notebooks/{dataset_slug}_quickstart.ipynb` exists
 - Verify required credentials exist for the dataset's access pattern:
   - Pattern A (CDS API): `~/.cdsapirc`
-  - Pattern B, Earthdata subset: `~/.netrc`
-  - Pattern B, open: none
+  - Pattern B (direct download, open): none
+  - Pattern B (Earthdata subset): `~/.netrc`
   - Pattern C (EDH, CEDA): dataset-specific token files or env vars
+  - Pattern D (cloud Zarr, e.g. ARCO-ERA5): none (public bucket)
+  - Pattern E (EWDS API, e.g. GloFAS): `EWDS_KEY` env var
 - Verify required Python packages are importable
 - If any pre-flight check fails, log and halt (do not modify files)
 

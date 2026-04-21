@@ -1,278 +1,192 @@
 # Session handoff: climate-data-quickstart
 
 Read this first if you are a new Claude Code session picking up work on
-this repo. Written 2026-04-20. Supersedes `PLAN.md` for the current
-state; `PLAN.md` is preserved as the original intent.
+this repo. Last updated 2026-04-21.
 
-## One-line project summary
+## One-line summary
 
-A curated, opinionated reference repo for twelve climate datasets (docs
-+ download scripts + quickstart notebooks), plus a local-only Streamlit
-desktop app that lets anyone select a dataset, fill in a form, and
-download the data without writing Python.
+A curated reference repo for 17 climate and weather datasets (docs,
+download scripts, quickstart notebooks) plus a local-only Streamlit
+desktop app with interactive explorer, streaming preview, and ESGF
+multi-model comparison.
 
 ## Who this is for
 
 MSc/PhD climate students, early-career climate scientists, and climate
-risk analysts. User (Alfie) is building it as a portfolio piece plus a
+risk analysts. User (Alfie) is building it as a portfolio piece and a
 useful resource. British English throughout. See `CLAUDE.md` for the
 full style and source rules.
 
-## Current state (24 commits on `main`)
+## Current state
 
-### What is shipped
+### Datasets shipped: 17
 
-- **12 datasets** each with `docs/{slug}/README.md`, `scripts/{slug}_download.py`,
-  `notebooks/{slug}_quickstart.ipynb`. Two more (UKCP18, GPWv4) are
-  deferred pending the user registering for CEDA and NASA Earthdata.
-- **Streamlit local-only desktop app** at `app/` with:
-  - Dataset picker + credential status sidebar
-  - Shared form widgets (bbox presets, time pickers, output dir)
-  - One `render_form()` module per dataset in `app/dataset_pages/`
-  - Dispatcher (`app/runner.py`) calling the existing `scripts/*_download.download()` functions
-  - Special EDH flow with streaming code snippet + optional file download
-- **Setup / launch scripts**: `setup.bat`, `setup.sh`, `run_app.bat`, `run_app.sh`, `environment.yml`
-- **Credentials helper** (`common/credentials.py` + `app/credentials.py`) that checks five patterns (CDS, EDH, NASA Earthdata, CEDA, EWDS) without ever reading the key strings themselves
-- **Root `README.md`** with the "Two ways to use it" framing
-- `LICENSE` (MIT)
+Each has `docs/{slug}/README.md`, `scripts/{slug}_download.py`,
+`notebooks/{slug}_quickstart.ipynb` (except EDH explorer which is
+app-only).
 
-### What is verified live
+| Category | Datasets |
+|----------|----------|
+| ERA5 | single levels, pressure levels, land, daily statistics |
+| Streaming | Earth Data Hub, ARCO-ERA5, EDH catalogue explorer |
+| Models | CMIP6 (CDS), ESGF CMIP6 (full archive), C3S seasonal |
+| Observations | HadCET, HadCRUT5, GHCNd, E-OBS, CHIRPS |
+| Forecast | ECMWF Open Data, GloFAS |
 
-- HadCET parsers (monthly + daily, all four variants) against Met Office
-- HadCRUT5 URL pattern + `tas_mean` variable name against Met Office
-- GHCNd parser against Heathrow station (39,923 rows)
-- Earth Data Hub Zarr URL against EDH catalogue (requires EDH credentials
-  in `~/_netrc` on Windows)
-- ERA5 single levels full download against CDS
+Two more are deferred: UKCP18 (needs CEDA account), GPWv4 (needs NASA
+Earthdata account).
 
-### What is still to do (for v0.1 ship)
+### Streamlit app
 
-See "Open threads" section at the bottom.
+The app (`app/main.py`) is fully functional with:
+
+- **Home page** (`app/dataset_pages/home.py`): 17 dataset cards with
+  access-method badges, search-by-topic, 3-step quick-start guide,
+  clickable cards that navigate to the download form
+- **Download mode**: per-dataset forms with shared widgets (bbox presets,
+  year range, output dir). Category pills + radio for dataset selection.
+- **Explore mode** (`app/dataset_pages/explore.py`): load any
+  NetCDF/GRIB/CSV, see data quality metrics, interactive maps, time
+  series, code snippets
+- **Streaming**: EDH and ARCO-ERA5 have "Stream & preview" + "Show code"
+  buttons. Preview loads a Zarr slice without downloading a file.
+- **ESGF CMIP6** (`app/dataset_pages/esgf_cmip6.py`): three modes -
+  single model download, ensemble members (r1-rN of one model), and
+  multi-model comparison. Post-download panel has time series tab and
+  spatial maps tab.
+- **Credential panel**: sidebar shows green badges for configured
+  credentials, expandable setup instructions for missing ones
+- **Navigation**: full-width sidebar buttons (Home / Explore / Download)
+  with active state highlighting
+- **Theme**: custom `.streamlit/config.toml` with dark sidebar,
+  Inter font, JetBrains Mono code font
+
+### Packaging
+
+- `setup.bat` / `setup.sh` - one-time venv creation + pip install
+- `run_app.bat` / `run_app.sh` - launch the app
+- `environment.yml` - conda alternative
+- `requirements.txt` - 20 packages including `ecmwf-opendata`,
+  `nc-time-axis`, `gcsfs` (all verified installed and working)
+- `README.md` - updated for 17 datasets, quick-start front and centre
+
+### What is NOT committed
+
+As of this handoff, there is a large amount of uncommitted work in the
+working tree. Run `git status` to see the full list. Key changes:
+
+- 5 new dataset modules in `app/dataset_pages/` (arco_era5, c3s_seasonal,
+  ecmwf_open_data, esgf_cmip6, edh_explorer)
+- `app/dataset_pages/home.py` (new landing page with cards and search)
+- `app/dataset_pages/explore.py` (new file explorer)
+- Significant modifications to `app/main.py`, `app/forms.py`,
+  `app/credentials.py`, and all existing dataset page modules
+- `.streamlit/config.toml` (custom theme)
+- New docs, scripts, notebooks for the 5 new datasets
+- Updated `requirements.txt`, `environment.yml`, `setup.bat`, `setup.sh`
+- Updated `README.md`, `PLAN.md`, this file
 
 ## Repo layout
 
 ```
 climate-data-quickstart/
-|
-|-- CLAUDE.md                  # Style rules + access patterns + notebook standard
-|-- PLAN.md                    # Original plan, frozen in time
-|-- SESSION_HANDOFF.md         # This file - current state for a new session
-|-- README.md                  # Public repo README with "Two ways to use it"
-|-- LICENSE                    # MIT
-|-- requirements.txt
-|-- environment.yml            # conda alternative
-|-- setup.bat / setup.sh       # One-time venv + pip install
-|-- run_app.bat / run_app.sh   # Launches Streamlit at localhost:8501
-|
-|-- app/                       # The Streamlit desktop app (NEW this session)
-|   |-- main.py                # Entry point + sidebar router + result panel
-|   |-- credentials.py         # UI-friendly status checks for 5 cred patterns
-|   |-- forms.py               # Shared widgets: bbox, time, output, result panel
-|   |-- runner.py              # Thin dispatcher to scripts/*_download
-|   \-- dataset_pages/         # One module per dataset with render_form()
-|       |-- __init__.py        # DATASETS registry (slug -> (name, module))
-|       |-- era5_single_levels.py
-|       |-- era5_pressure_levels.py
-|       |-- era5_land.py
-|       |-- era5_daily_stats.py
-|       |-- earth_data_hub.py  # Has streaming_snippet() in addition to render_form()
-|       |-- hadcet.py
-|       |-- hadcrut5.py
-|       |-- cmip6.py
-|       |-- glofas.py
-|       |-- ghcnd.py
-|       |-- e_obs.py
-|       \-- chirps.py
-|
-|-- common/
-|   |-- __init__.py
-|   |-- credentials.py         # Shared credential checks used by scripts
-|   \-- plotting.py            # Plotting defaults (colourmaps, map axes)
-|
-|-- docs/                      # Per-dataset README + variables.md
-|   |-- era5-single-levels/    # The heaviest entry, also the template
-|   |-- era5-pressure-levels/
-|   |-- era5-land/
-|   |-- era5-daily-stats/
-|   |-- earth-data-hub/
-|   |-- hadcet/
-|   |-- hadcrut5/
-|   |-- cmip6/
-|   |-- glofas/
-|   |-- ghcnd/
-|   |-- e-obs/
-|   \-- chirps/
-|
-|-- notebooks/                 # Per-dataset quickstart .ipynb
-|-- scripts/                   # Per-dataset download.py
-|
-|-- .claude/
-|   |-- agents/                # researcher.md, tester.md, reviewer.md
-|   |-- skills/dataset-pipeline/  # Orchestration skill
-|   \-- settings.local.json    # Permissions allowlist for the project
-|
-\-- .gitignore                 # Python + credentials + data/ + .research/ etc.
+  CLAUDE.md                    # Style rules, access patterns, notebook standard
+  PLAN.md                      # Working plan with dataset queue and status
+  SESSION_HANDOFF.md           # This file
+  README.md                    # Public README with quick-start
+  requirements.txt / environment.yml
+  setup.bat / setup.sh         # One-time setup
+  run_app.bat / run_app.sh     # Launch app
+
+  app/
+    main.py                    # Streamlit entry point, sidebar, routing
+    credentials.py             # Credential status checks (UI-friendly)
+    forms.py                   # Shared widgets, result panel, interactive plots
+    runner.py                  # Dispatcher to scripts/*_download
+    dataset_pages/
+      __init__.py              # DATASETS registry, CATEGORIES, DATASET_INFO
+      home.py                  # Landing page with cards and search
+      explore.py               # File explorer for existing downloads
+      era5_single_levels.py    # ... one module per dataset
+      esgf_cmip6.py            # Has render_mode_selector() for outside-form radio
+      ...
+
+  scripts/                     # Per-dataset download scripts
+  notebooks/                   # Per-dataset quickstart notebooks
+  docs/                        # Per-dataset README + variables.md
+  common/                      # Shared helpers (credentials, plotting)
+
+  .streamlit/config.toml       # Custom theme
+  .claude/agents/              # researcher.md, tester.md, reviewer.md
+  .claude/skills/              # dataset-pipeline orchestration skill
+  .research/                   # Research briefs (gitignored)
 ```
 
-## Running the app right now
+## Architecture notes
 
-There may already be a Streamlit process bound to port 8501 from the
-previous session (background command `btvbgnsmo`). If so, the user can
-refresh http://localhost:8501. If not:
+### Layered design
 
 ```
-cd C:\climate-data\climate-data-quickstart
-.\run_app.bat
-```
-
-The app binds to `localhost` only. Credentials are read from the user's
-`~/.cdsapirc`, `~/.netrc` or `~/_netrc` (Windows convention), or
-environment variables. The app itself never sees or stores key strings.
-
-## Architecture notes worth knowing
-
-### Three credential patterns across 12 datasets
-
-- **CDS API**: ERA5 family, CMIP6, E-OBS. Reads `~/.cdsapirc`.
-- **Direct HTTP**: HadCET, HadCRUT5, GHCNd, CHIRPS. No auth.
-- **Custom**: Earth Data Hub (via netrc), GloFAS (EWDS endpoint + env var),
-  NASA Earthdata for GPWv4 (via netrc), CEDA for UKCP18 (bearer token).
-
-See `common/credentials.py` for check functions and
-`app/credentials.py` for the UI-friendly status panel that feeds the
-sidebar.
-
-### Scripts / notebooks / app are layered
-
-```
-app (Streamlit UI)  ->  scripts/*_download.download()  ->  cdsapi.Client() / requests
+Streamlit app  ->  scripts/*_download.download()  ->  cdsapi / requests / xarray
      ^
-     |
-notebooks/*.ipynb   (same download() functions, interactive)
+notebooks/*.ipynb  (same download() functions, interactive)
 ```
 
-The app is additive. Existing scripts and notebooks keep working
-unchanged for CLI users.
+The app is additive. Scripts and notebooks work independently.
 
-### EDH is streaming, not queued
+### Five access patterns
 
-The Earth Data Hub page is the exception. Its primary output is a
-streaming code snippet the user can copy, plus an optional "Download
-sliced data to file" button. The page exposes both `render_form()` and
-`streaming_snippet()`; `main.py` checks the slug and routes accordingly.
+- CDS API (`cdsapi`, `~/.cdsapirc`): ERA5 family, CMIP6, E-OBS, C3S
+- Direct HTTP (`requests`): HadCET, HadCRUT5, GHCNd, CHIRPS, ESGF
+- ECMWF client (`ecmwf.opendata`): ECMWF Open Data
+- Zarr streaming (`xarray` + `fsspec`/`gcsfs`): EDH, ARCO-ERA5
+- EWDS API (`cdsapi` EWDS endpoint): GloFAS
 
-### The netrc platform gotcha
+### ESGF multi-model / ensemble
 
-On Windows, File Explorer does not permit leading-dot filenames, so
-users have `~/_netrc` instead of `~/.netrc`. Both `common/credentials.py`
-and `app/credentials.py` check both locations. Do not assume one or the
-other.
+`_build_multi_model_ts()` in `main.py` handles both multi-model and
+single-model ensemble runs. It detects which case based on the number
+of unique model names in the downloaded files, then labels the
+concatenation dimension as "model" or "member" accordingly.
 
-## Known working, known broken, known TBD
+### Credential checks
 
-### Working (verified live by the user in this session)
+`app/credentials.py` checks file existence and netrc entries only. It
+never reads credential strings. The sidebar renders green badges for
+configured credentials and expandable instructions for missing ones.
 
-- Streamlit app boots cleanly
-- Dataset sidebar renders 12 items
-- Credential status panel (CDS configured, EDH configured via _netrc)
-- EDH "Show streaming code" button produces a correct code snippet
-- EDH "Download sliced data to file" worked once the `ds.sizes` fix was
-  applied to distinguish `valid_time` from `time`
+### Platform: Windows
 
-### Not fully verified yet
+User is on Windows 11 with Python 3.12. Bash in Claude Code is
+MSYS-style. The netrc file is `~/_netrc` on Windows (File Explorer
+does not allow leading-dot filenames). Both `~/.netrc` and `~/_netrc`
+are checked.
 
-- Other dataset forms (ERA5 single/pressure/land/daily stats, HadCET,
-  HadCRUT5, CMIP6, GloFAS, GHCNd, E-OBS, CHIRPS) have been smoke-tested
-  at import level but the user has not clicked through each to confirm
-  the full flow end to end.
+## Credential status
 
-### Open threads
-
-1. **Apply the `developing-with-streamlit` Claude Code skill.** The user
-   installed it between sessions and wants the app/ code reviewed and
-   polished against that skill's guidance. This is the first thing to do
-   in the new session: load the skill, read it, audit `app/main.py`,
-   `app/forms.py`, `app/dataset_pages/*.py`, and `app/credentials.py`
-   against its patterns.
-2. **Editorial "when I reach for this" lines** per dataset README. User
-   wants one or two sentences in their own voice per docs/*/README.md so
-   it reads as theirs, not as generated. Human touch - offer to help draft
-   but user decides the voice.
-3. **End-to-end smoke test** on a clean clone. User should clone the
-   repo fresh, run setup.bat, run_app.bat, and click through each
-   dataset. Any failures feed into the next polish pass.
-4. **LinkedIn post** when the app is polished. The narrative arc is
-   "I built a curated reference for 12 climate datasets plus a local
-   desktop tool where your API keys never leave your machine". The
-   EDH streaming angle plus the privacy angle are the two hooks.
-5. **Potential Python packaging upgrade**. Currently setup.bat creates
-   a `.venv/`. Consider PyInstaller single-exe for non-technical users.
-   User flagged as "mix of batch and conda" so a PyInstaller build
-   is out of immediate scope but could be a v0.2 addition.
-6. **Deferred datasets**. UKCP18 (CEDA) and GPWv4 (NASA Earthdata)
-   remain stubs in `PLAN.md`. User needs to register before these can
-   be built. Once credentials land, they follow the same docs + script
-   + notebook + `app/dataset_pages/` pattern as the others.
-
-## How to pick up work in a new session
-
-1. Read this file.
-2. Check `git log --oneline | head -15` to see what has landed.
-3. Check `git status` for any uncommitted drift.
-4. Load the `developing-with-streamlit` skill if you have not already
-   (it was installed from https://github.com/streamlit/agent-skills at
-   `~/.claude/skills/developing-with-streamlit/`).
-5. Decide which open thread to pick up (the user will usually say).
-6. Use the existing persistent memory in
-   `C:\Users\alfie\.claude\projects\C--climate-data-climate-data-quickstart\memory\`
-   for user and collaboration preferences.
-
-## Key user preferences from memory
-
-- **British English.** No em dashes, no banned words
-  ("comprehensive", "robust", "leverage", etc.), sentence-case headings.
-- **Plan first, then build.** Major work gets a PLAN.md-style doc or a
-  short proposal before execution.
-- **Primary sources only** for technical claims. Mark uncertain facts
-  with `[VERIFY]`.
-- **Per-dataset commits** with standardised messages.
-- **Scope discipline.** Docs pages are 150-250 lines (ERA5 single levels
-  is the exception at the heavy end of acceptable). No glossary, no
-  recipes section. Link to ECMWF / Met Office / NCEI docs instead of
-  duplicating.
-- **User is on Windows.** Bash in Claude Code is MSYS-style, forward
-  slashes in paths, `_netrc` not `.netrc`, LF to CRLF warnings are
-  expected and harmless.
-- **Claude's style in responses.** Short and direct. No filler. Lead
-  with the action or the answer.
-
-## Test credentials status as of handoff
-
-- CDS: configured at `C:\Users\alfie\.cdsapirc`
-- EDH: configured in `C:\Users\alfie\_netrc`
+- CDS: configured (`~/.cdsapirc`)
+- EDH: configured (`~/_netrc`)
 - NASA Earthdata: NOT configured
 - CEDA: NOT configured
 - EWDS (GloFAS): NOT configured
 
-Any dataset that needs one of the not-configured patterns will grey out
-its Download button and show setup instructions in the sidebar.
+## What is next
 
-## Recent commits for context
+1. **Commit** the large batch of uncommitted work
+2. **Smoke test** on a fresh clone (setup.bat, run_app.bat, click through)
+3. **Editorial pass** on docs (user's own voice per dataset)
+4. **LinkedIn post** framing: "built this for myself, sharing in case useful"
+5. **Tutorial section** possibly (user mentioned, not decided)
+6. UKCP18 and GPWv4 when credentials available
 
-```
-49ca876 EDH: use ds.sizes for time-dim detection, raise explicit error on miss
-26d0fd7 Fix EDH UX: short-name variables, streaming snippet, netrc platform detection
-007fa86 Add Streamlit desktop app: local-only UI for all 12 datasets
-8a2a057 Polish e-obs wording and labels
-622b587 Verify and fix HadCET parsers, HadCRUT5 URLs, EDH longitude handling
-e52c80c Rewrite ghcnd parser: single wide_to_long reshape, vectorised scaling
-390f179 Fix review findings: URLs, units, config naming, code correctness
-ce90cbf Add root README with dataset overview table, MIT LICENSE, update PLAN
-```
+## Key user preferences
 
-## Final note
-
-The user has been moving fast this session. They prefer building and
-iterating over long upfront planning once a direction is set. Respect
-that: propose, confirm briefly, ship, iterate on feedback. Do not
-re-plan work that has already been decided.
+- British English, no em dashes, no banned words, sentence-case headings
+- Plan first, then build. Major decisions in PLAN.md.
+- Primary sources only for technical claims. `[VERIFY]` for uncertain facts.
+- Short, direct communication. No filler.
+- Prefers back-and-forth planning before building
+- User is on Windows, works with ERA5/CDS/HPC, has adjacent "quantum
+  pipeline" project using Earth Data Hub
+- Persistent memory at:
+  `C:\Users\alfie\.claude\projects\C--climate-data-climate-data-quickstart\memory\`

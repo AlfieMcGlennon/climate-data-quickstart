@@ -13,6 +13,14 @@ Produced by the Copernicus Climate Change Service (C3S) at ECMWF.
 > primary documentation. For research-grade analysis, follow the Confluence
 > links throughout and consult the Hersbach et al. 2020 reference paper.
 
+## When to use this
+
+The default starting point for almost any climate analysis that needs
+gridded surface weather. If you need temperature, wind, precipitation,
+or radiation anywhere on the globe from 1940 onward, start here. Move
+to ERA5-Land if you need finer resolution over land, or to pressure
+levels if you need upper-air fields.
+
 ## What this dataset is
 
 ERA5 is the fifth generation of ECMWF's global atmospheric reanalysis. A

@@ -10,6 +10,14 @@ server-side derived product over the underlying ERA5 hourly archive.
 > and early-career researchers. For the authoritative technical detail,
 > see the ECMWF documentation linked throughout.
 
+## When to use this
+
+When you need daily mean, max, or min and do not want to download 24
+hourly steps and aggregate them yourself. The CDS computes the
+statistics server-side, so the download is 24 times smaller. Good for
+heatwave analysis (daily max temperature), frost days, or any threshold
+study where the daily extremes matter more than the hourly evolution.
+
 ## At a glance
 
 | Property | Value |

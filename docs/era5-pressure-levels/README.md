@@ -11,6 +11,14 @@ Produced by the Copernicus Climate Change Service (C3S) at ECMWF.
 > [ERA5 single levels](../era5-single-levels/README.md) entry for surface
 > and near-surface variables.
 
+## When to use this
+
+Reach for this when your analysis needs vertical structure: jet stream
+identification (250 hPa winds), temperature inversions, upper-air
+geopotential for synoptic typing, or any profile from 1000 hPa to
+1 hPa. If you only need surface-level fields, ERA5 single levels is
+simpler and smaller.
+
 ## At a glance
 
 | Property | Value |

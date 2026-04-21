@@ -8,6 +8,14 @@ Produced by UCSB Climate Hazards Center and USGS EROS.
 > **Scope of this page.** A getting-started reference. For full details
 > see https://www.chc.ucsb.edu/data/chirps and Funk et al. 2015.
 
+## When to use this
+
+When you need rainfall data in the tropics or subtropics, especially
+Africa, and want the best available blend of satellite and station
+observations. CHIRPS was built for drought monitoring and food security
+analysis. Note that it covers 50S to 50N only, so it does not include
+the UK or most of Europe.
+
 ## At a glance
 
 | Property | Value |

@@ -9,6 +9,14 @@ Climate Data Store.
 > **Scope of this page.** A getting-started reference. Authoritative
 > terms at https://www.ecad.eu/ and on the CDS dataset page.
 
+## When to use this
+
+When you need daily European observations on a grid. E-OBS interpolates
+station data onto a regular grid, giving you something closer to ground
+truth than ERA5 but with spatial coverage. Good for validating model
+output against observations over Europe, or for studies that need
+observed (not reanalysed) temperature and precipitation fields.
+
 ## At a glance
 
 | Property | Value |

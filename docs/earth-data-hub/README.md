@@ -10,6 +10,14 @@ programme, operated by ECMWF and collaborators.
 > the authoritative platform documentation, see
 > https://earthdatahub.destine.eu/getting-started.
 
+## When to use this
+
+When you want ERA5 data without waiting in the CDS queue. EDH streams
+the bytes you actually need over the network, so there is no file to
+download, no queue, and you can work with the data lazily in xarray.
+Particularly useful for interactive exploration or when you need a small
+slice of a large dataset and the CDS queue is hours long.
+
 ## At a glance
 
 | Property | Value |

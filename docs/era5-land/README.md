@@ -11,6 +11,14 @@ Produced by the Copernicus Climate Change Service (C3S) at ECMWF.
 > [ERA5 single levels](../era5-single-levels/README.md) entry for
 > lower-resolution but broader-coverage atmospheric variables.
 
+## When to use this
+
+When you need land-surface variables (soil moisture, snow, evaporation)
+at higher resolution than standard ERA5. The 0.1 degree grid resolves
+features like river valleys and coastal effects that the 0.25 degree
+ERA5 grid misses. No ocean points, so file sizes are smaller for the
+same region and time range.
+
 ## At a glance
 
 | Property | Value |

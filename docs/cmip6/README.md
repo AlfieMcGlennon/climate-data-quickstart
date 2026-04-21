@@ -12,6 +12,14 @@ full ESGF archive.
 > Zarr mirror or direct ESGF access (`esgf-pyclient`) are more
 > appropriate. Background on the CMIP6 design is in Eyring et al. (2016).
 
+## When to use this
+
+When you need climate projections under different emission scenarios and
+want a simple route through the CDS with familiar credentials. Good for
+pulling one or two models and scenarios for a dissertation or report.
+For multi-model ensembles or the full CMIP6 archive (all models, all
+experiments, all members), use ESGF directly instead.
+
 ## At a glance
 
 | Property | Value |

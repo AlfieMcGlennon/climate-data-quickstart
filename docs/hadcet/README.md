@@ -10,6 +10,14 @@ Produced by the Met Office Hadley Centre.
 > authoritative terms and caveats live at
 > https://www.metoffice.gov.uk/hadobs/hadcet/.
 
+## When to use this
+
+When you need a long, homogenised temperature record for the UK. 365
+years of monthly data makes it the best dataset for studying long-term
+climate variability in England, from the Little Ice Age through to the
+present. No grid, no spatial dimension, just a single time series, so
+it downloads in seconds and is easy to work with.
+
 ## At a glance
 
 | Property | Value |

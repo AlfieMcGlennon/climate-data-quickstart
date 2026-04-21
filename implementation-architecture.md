@@ -1,5 +1,12 @@
 # Climate Data Toolkit: Implementation Architecture
 
+> **Historical document.** Written during initial project planning
+> (2026-04-19). The agent definitions and pipeline skill described here
+> were implemented and used to build the first 12 datasets. The actual
+> agent files at `.claude/agents/` and `.claude/skills/` are the
+> authoritative versions. For current project state, see
+> `SESSION_HANDOFF.md` and `PLAN.md`.
+
 ---
 
 ## 1. CLAUDE.md (Root of Repo)

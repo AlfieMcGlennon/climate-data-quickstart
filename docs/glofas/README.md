@@ -11,6 +11,14 @@ forcing.
 > practitioners. For deep technical detail see Harrigan et al. 2020 and
 > https://www.globalfloods.eu/.
 
+## When to use this
+
+When you need river discharge rather than precipitation or temperature.
+GloFAS is the only global gridded discharge reanalysis, so it is the
+starting point for any flood risk analysis, hydrological baseline study,
+or catchment-scale water balance where you need a long consistent record
+of streamflow.
+
 ## At a glance
 
 | Property | Value |

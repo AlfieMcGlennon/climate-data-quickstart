@@ -4,9 +4,14 @@ Living document. Update as we go.
 
 ## Current phase
 
-**Phase complete.** 12 of 14 datasets shipped. UKCP18 and GPWv4 deferred
-until the user registers CEDA and NASA Earthdata accounts respectively.
-Root README.md written.
+**v1.1 complete.** 17 datasets shipped across five categories. Streamlit
+desktop app fully functional with home page, dataset search, interactive
+explorer, streaming preview, and ESGF multi-model/ensemble comparison.
+Packaging (setup scripts, requirements, environment.yml, README) updated
+and ready for distribution.
+
+Two datasets remain deferred: UKCP18 (needs CEDA account) and GPWv4
+(needs NASA Earthdata account).
 
 ## Operating decisions (from kick-off Q&A, 2026-04-19)
 
@@ -30,130 +35,88 @@ Root README.md written.
 
 ## Dataset queue
 
-Order matters. Each dataset builds on the last for narrative and technical reasons.
+| # | Slug | Name | Access | Status |
+|---|------|------|--------|--------|
+| 1 | era5-single-levels | ERA5 single levels | CDS API | shipped |
+| 2 | era5-pressure-levels | ERA5 pressure levels | CDS API | shipped |
+| 3 | era5-land | ERA5-Land | CDS API | shipped |
+| 4 | era5-daily-stats | ERA5 daily statistics | CDS API | shipped |
+| 5 | earth-data-hub | Earth Data Hub | Zarr streaming | shipped |
+| 6 | hadcet | HadCET | Direct HTTP | shipped |
+| 7 | hadcrut5 | HadCRUT5 | Direct HTTP | shipped |
+| 8 | cmip6 | CMIP6 (CDS) | CDS API | shipped |
+| 9 | ukcp18 | UKCP18 | CEDA | deferred: CEDA account not registered |
+| 10 | glofas | GloFAS historical | EWDS API | shipped |
+| 11 | ghcnd | GHCNd | Direct HTTP | shipped |
+| 12 | e-obs | E-OBS | CDS API | shipped |
+| 13 | gpw-population | GPWv4 | NASA Earthdata | deferred: Earthdata account not registered |
+| 14 | chirps | CHIRPS | Direct HTTP | shipped |
+| 15 | arco-era5 | ARCO-ERA5 | Cloud Zarr (GCS) | shipped (v1.1) |
+| 16 | ecmwf-open-data | ECMWF Open Data | Direct HTTP | shipped (v1.1) |
+| 17 | c3s-seasonal | C3S seasonal | CDS API | shipped (v1.1) |
+| 18 | esgf-cmip6 | ESGF CMIP6 (full archive) | Direct HTTP | shipped (v1.1) |
+| 19 | edh-explorer | EDH catalogue explorer | Zarr streaming | shipped (v1.1) |
 
-| # | Slug | Name | Access | Default region | Credentials | Status |
-|---|------|------|--------|----------------|-------------|--------|
-| 1 | era5-single-levels | ERA5 Single Levels | CDS API | UK bbox | ~/.cdsapirc | shipped (factual fixes + polish applied) |
-| 2 | era5-pressure-levels | ERA5 Pressure Levels | CDS API | UK bbox | ~/.cdsapirc | shipped |
-| 3 | era5-land | ERA5-Land | CDS API | UK bbox | ~/.cdsapirc | shipped |
-| 4 | era5-daily-stats | ERA5 Daily Statistics | CDS API | UK bbox | ~/.cdsapirc | shipped |
-| 5 | earth-data-hub | Earth Data Hub | Custom API | UK bbox | EDH token | shipped |
-| 6 | hadcet | HadCET | Direct download | Central England (fixed) | None | shipped |
-| 7 | hadcrut5 | HadCRUT5 | Direct download | Global (5 deg grid) | None | shipped |
-| 8 | cmip6 | CMIP6 | CDS API | UK bbox | ~/.cdsapirc | shipped |
-| 9 | ukcp18 | UKCP18 | CEDA | UK (full) | CEDA token (needed) | deferred: CEDA account not registered |
-| 10 | glofas | GloFAS | CDS API (CEMS) | UK bbox | ~/.cdsapirc | shipped |
-| 11 | ghcnd | GHCNd | Direct download | Station list (UK) | None | shipped |
-| 12 | e-obs | E-OBS | CDS API | UK bbox | ~/.cdsapirc | shipped |
-| 13 | gpw-population | GPWv4 | Direct download | UK bbox | ~/.netrc (Earthdata) | deferred: NASA Earthdata account not registered |
-| 14 | chirps | CHIRPS | Direct download | East Africa small bbox | None | shipped |
+## App features (Streamlit desktop)
 
-### Order rationale
+The app at `app/main.py` provides a full GUI for all 17 datasets:
 
-- **1 to 4 (ERA5 family)**: Build momentum. Same access pattern, same credentials,
-  same output format. Establishes the template and gets four entries done quickly.
-- **5 (Earth Data Hub)**: Narrative pivot. After showing the standard CDS route
-  four times, introduce the streaming alternative. Strong differentiator because
-  no one else documents EDH properly.
-- **6, 7 (HadCET, HadCRUT5)**: Met Office direct downloads, no authentication,
-  simple HTTP. Easy wins after the API-heavy start.
-- **8 (CMIP6)**: Shift from reanalysis to projections. Natural conceptual transition.
-- **9 (UKCP18)**: Regional high-resolution projections. Depends on CEDA account.
-- **10 (GloFAS)**: Pivot to impact variables (river discharge). Still uses CDS
-  (via CEMS endpoint).
-- **11, 12 (GHCNd, E-OBS)**: Observational datasets. GHCNd is station-based,
-  introduces that pattern. E-OBS is gridded European observations.
-- **13 (GPWv4)**: Non-climate but essential for climate risk work (population
-  exposure). Needs NASA Earthdata login.
-- **14 (CHIRPS)**: Precipitation specialty dataset. Tropical focus, good capstone
-  for showing regional/specialist datasets.
+- **Home page** with dataset cards, search-by-topic, 3-step quick-start guide
+- **Download mode** with per-dataset forms, bbox presets, time range pickers
+- **Explore mode** to open any NetCDF/GRIB/CSV and get interactive maps, time
+  series, data quality metrics, and reproducible code snippets
+- **Streaming preview** for EDH and ARCO-ERA5 (load a Zarr slice without
+  downloading)
+- **ESGF CMIP6** with three modes: single model, ensemble members (r1-rN of
+  one model), and multi-model comparison
+- **Credential panel** in sidebar showing configured/missing credentials with
+  setup instructions
+- **Navigation** via full-width sidebar buttons (Home / Explore / Download)
+- **Category pills** for organising datasets into ERA5, Streaming, Models,
+  Observations, Forecast
+- Custom Streamlit theme (`.streamlit/config.toml`) with dark sidebar
 
-## Per-dataset configuration notes
+## Access patterns
 
-### era5-single-levels
-- Default variable: `2m_temperature`
-- Test pull: 1 day, 1 variable, UK bbox
-- Output: NetCDF
-- Known quirks: CDS API uses long variable names (`2m_temperature`) but the
-  underlying GRIB uses short names (`2t`). Document both.
+### Pattern A: Copernicus CDS API
+- Used for: ERA5 (all), CMIP6, E-OBS, C3S seasonal
+- Python package: `cdsapi`
+- Credentials: `~/.cdsapirc`
 
-### era5-pressure-levels
-- Default variable: `temperature` at 850 hPa
-- Test pull: 1 day, 1 variable, 1 level, UK bbox
+### Pattern B: Direct download
+- Used for: HadCET, HadCRUT5, GHCNd, CHIRPS, ECMWF Open Data, ESGF CMIP6
+- Python package: `requests`, `ecmwf.opendata` (ECMWF Open Data)
+- Credentials: none (all open access)
 
-### era5-land
-- Default variable: `2m_temperature` (ERA5-Land has different variable naming than single levels)
-- Higher resolution than ERA5 (0.1 deg vs 0.25 deg)
+### Pattern C: Custom Python API
+- Used for: Earth Data Hub, EDH explorer
+- Python package: `xarray` + `zarr` + `fsspec`
+- Credentials: netrc entry for `data.earthdatahub.destine.eu`
 
-### era5-daily-stats
-- Pre-computed daily aggregates. Saves the user from doing the hourly-to-daily
-  conversion themselves.
+### Pattern D: Cloud-native Zarr
+- Used for: ARCO-ERA5
+- Python package: `xarray` + `zarr` + `gcsfs`
+- Credentials: none (public GCS bucket)
 
-### earth-data-hub
-- Blocked until user provides reference code from quantum pipeline project
-- Emphasise streaming vs download-and-open paradigm
+### Pattern E: EWDS API
+- Used for: GloFAS
+- Python package: `cdsapi` (EWDS endpoint)
+- Credentials: `EWDS_KEY` environment variable
 
-### hadcet
-- Central England Temperature - single time series, no spatial dimension
-- Daily and monthly versions both available
-- Oldest instrumental record in the world (from 1659)
+## Packaging
 
-### hadcrut5
-- 5-degree global grid
-- Anomalies, not absolute temperatures. Document the reference period clearly.
-
-### cmip6
-- Multiple models, multiple scenarios (SSPs)
-- Default: one model, one scenario, for test pull
-
-### ukcp18
-- CEDA access required. User has not yet registered.
-- 12km regional climate projections for UK
-
-### glofas
-- River discharge, not typical weather variables
-- CEMS endpoint, not main CDS
-
-### ghcnd
-- No bbox. Use a STATIONS list instead of BBOX.
-- Default: a small set of UK stations (e.g., Heathrow, Manchester)
-
-### e-obs
-- European gridded daily observations
-- Reasonable UK bbox test pull
-
-### gpw-population
-- Static dataset, not time-varying
-- Needs NASA Earthdata login via ~/.netrc
-
-### chirps
-- UK is outside reliable CHIRPS coverage (designed for tropical/subtropical)
-- Use East Africa bbox as default (e.g., Kenya roughly: N=5, S=-5, W=34, E=42)
-- Explain in docs why UK is not the default for this one
+- `setup.bat` / `setup.sh` - creates `.venv/`, installs from `requirements.txt`
+- `run_app.bat` / `run_app.sh` - activates venv, launches Streamlit
+- `environment.yml` - conda alternative (cartopy installs more reliably via conda)
+- `requirements.txt` - all pip dependencies pinned to minimum compatible versions
+- User only needs Python 3.10+ installed; everything else is handled by setup
 
 ## Known blockers
 
-1. **CEDA account** - user to register at https://services.ceda.ac.uk/cedasite/register/info/
-   before dataset #9 (UKCP18)
-2. **NASA Earthdata account** - user to register at https://urs.earthdata.nasa.gov/
-   before dataset #13 (GPWv4)
-3. **Earth Data Hub reference code** - user to locate existing code from quantum
-   pipeline project before dataset #5
-
-## Build order for scaffolding
-
-1. Write CLAUDE.md (done)
-2. Write PLAN.md (this file, done)
-3. Replace Node.js .gitignore with Python-focused one
-4. Create directory scaffold: `docs/`, `scripts/`, `notebooks/`, `.research/`,
-   `.test_logs/`, `.review/`, `.claude/agents/`, `.claude/skills/`
-5. Write `.claude/agents/researcher.md`
-6. Write `.claude/agents/tester.md`
-7. Write `.claude/agents/reviewer.md`
-8. Do ERA5 Single Levels manually together, end to end
-9. Once template quality is approved, write `.claude/skills/dataset-pipeline/SKILL.md`
-10. Run remaining 13 datasets through the skill, semi-automated
+1. **CEDA account** - register at https://services.ceda.ac.uk/cedasite/register/info/
+   before UKCP18 can be built
+2. **NASA Earthdata account** - register at https://urs.earthdata.nasa.gov/
+   before GPWv4 can be built
 
 ## Quality gates
 
@@ -165,13 +128,12 @@ Before a dataset is considered "done":
 - Licence stated with attribution requirements
 - Dataset added to root README.md overview table
 
-## Out of scope for v0.1
+## What is next
 
-- MCP servers
-- Full CI/CD automation
-- Cross-dataset comparison utilities
-- Web frontend
-- Docker/container distribution
-
-Things above may come in v0.2 or later. For v0.1 the goal is: 14 datasets,
-each with docs, script, notebook, runnable, reviewed.
+- Commit all uncommitted work (significant app improvements, 5 new datasets,
+  packaging updates all sitting in working tree)
+- End-to-end smoke test on a fresh clone
+- Editorial pass on docs (user's own voice, "when I reach for this" lines)
+- LinkedIn post framing: "built this for myself, sharing in case useful"
+- Consider a tutorial/walkthrough section in the app or docs
+- UKCP18 and GPWv4 when credentials are available

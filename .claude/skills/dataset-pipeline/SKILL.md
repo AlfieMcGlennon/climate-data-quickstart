@@ -14,7 +14,8 @@ Invocation expects:
 - `dataset_slug` (e.g., `era5-single-levels`)
 - `dataset_name` (human-readable name)
 - Primary documentation `url`
-- Access pattern: `A` (CDS API), `B` (direct download), or `C` (custom API)
+- Access pattern: `A` (CDS API), `B` (direct download), `C` (custom API),
+  `D` (cloud Zarr), or `E` (EWDS API)
 
 ## Pre-flight
 

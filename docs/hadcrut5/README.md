@@ -11,6 +11,14 @@ temperature.
 > students. Authoritative terms and full caveats at
 > https://www.metoffice.gov.uk/hadobs/hadcrut5/.
 
+## When to use this
+
+The standard reference dataset for global warming. If you need to show
+how global mean temperature has changed since the 1850s, this is the
+dataset that the IPCC and most climate publications use. The 5 degree
+grid is coarse, but the record goes back to 1850 and the uncertainty
+estimates are well-characterised.
+
 ## At a glance
 
 | Property | Value |

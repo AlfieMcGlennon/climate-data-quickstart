@@ -9,6 +9,14 @@ Operated by NOAA NCEI.
 > specification see https://www.ncei.noaa.gov/pub/data/ghcn/daily/readme.txt
 > and Menne et al. 2012.
 
+## When to use this
+
+When you need actual observed values at a specific location rather than
+gridded estimates. Station data is the ground truth that reanalyses and
+satellite products are validated against. Useful for site-specific
+studies, model validation, or when you need long records from a
+particular airport, city, or research station.
+
 ## At a glance
 
 | Property | Value |
