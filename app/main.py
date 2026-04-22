@@ -31,6 +31,7 @@ from app.dataset_pages import (  # noqa: E402
     DATASETS,
 )
 from app.dataset_pages import explore as explore_page  # noqa: E402
+from app.dataset_pages import learn as learn_page  # noqa: E402
 from app.forms import result_panel, streaming_preview_panel  # noqa: E402
 from app.runner import run  # noqa: E402
 
@@ -54,15 +55,20 @@ def _render_sidebar() -> tuple[str, str | None]:
         "Your API keys never leave this machine."
     )
 
+    # Restore mode from URL query params so browser refresh stays on the same page
+    valid_modes = {"Home", "Explore", "Download", "Learn"}
     if "app_mode" not in st.session_state:
-        st.session_state["app_mode"] = "Home"
+        url_mode = st.query_params.get("mode", "Home")
+        st.session_state["app_mode"] = url_mode if url_mode in valid_modes else "Home"
 
     current = st.session_state["app_mode"]
+    st.query_params["mode"] = current
 
     nav_items = [
         (":material/home: Home", "Home"),
         (":material/search: Explore data", "Explore"),
         (":material/download: Download", "Download"),
+        (":material/school: Learn", "Learn"),
     ]
     for label, mode in nav_items:
         st.sidebar.button(
@@ -163,6 +169,10 @@ def main() -> None:
     if mode == "Explore":
         st.title(":material/search: Explore data")
         explore_page.render_page()
+        return
+
+    if mode == "Learn":
+        learn_page.render_page()
         return
 
     # ── Download mode ───────────────────────────────────────────────
