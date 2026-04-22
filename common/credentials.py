@@ -118,6 +118,54 @@ def check_edh_token() -> str | None:
         ) from None
 
 
+def _read_ewdsapirc() -> str | None:
+    """Read the EWDS key from ~/.ewdsapirc if it exists.
+
+    The file uses the same format as .cdsapirc:
+        url: https://ewds.climate.copernicus.eu/api
+        key: <token>
+    """
+    for name in (".ewdsapirc", "_ewdsapirc"):
+        path = Path.home() / name
+        if path.exists():
+            for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+                if line.strip().startswith("key:"):
+                    return line.split(":", 1)[1].strip()
+    return None
+
+
+def check_ewds_key() -> str:
+    """Return the EWDS API key from env var or ~/.ewdsapirc.
+
+    Returns:
+        The key string.
+
+    Raises:
+        FileNotFoundError: If no EWDS key is configured.
+    """
+    env_key = os.environ.get("EWDS_KEY")
+    if env_key:
+        return env_key
+
+    file_key = _read_ewdsapirc()
+    if file_key:
+        return file_key
+
+    raise FileNotFoundError(
+        "EWDS key not found.\n"
+        "GloFAS is on the Copernicus CEMS Early Warning Data Store (EWDS), "
+        "which is separate from the main CDS.\n\n"
+        "1. Register at https://ewds.climate.copernicus.eu/\n"
+        "2. Accept the GloFAS licence under your profile\n"
+        "3. Copy your Personal Access Token from the API key page\n"
+        "4. Save it to ~/.ewdsapirc:\n"
+        "     url: https://ewds.climate.copernicus.eu/api\n"
+        "     key: YOUR_TOKEN\n\n"
+        "   Or set the EWDS_KEY environment variable:\n"
+        "     export EWDS_KEY=YOUR_TOKEN"
+    )
+
+
 def check_ceda_token() -> str:
     """Verify a CEDA bearer token is configured.
 

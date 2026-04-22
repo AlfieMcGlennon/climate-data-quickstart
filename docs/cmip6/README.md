@@ -87,12 +87,17 @@ short name (`tas`), not the CDS request string.
 ## Get data in 5 minutes
 
 1. Register for a free CDS account at https://cds.climate.copernicus.eu/
-2. Accept the CMIP6 licence in your CDS profile (separate from ERA5).
-3. Create `~/.cdsapirc` with your Personal Access Token. See the
-   [ERA5 single levels docs](../era5-single-levels/README.md#get-data-in-5-minutes)
-   for the format.
-4. `pip install cdsapi xarray netcdf4`
-5. Run `python scripts/cmip6_download.py`
+2. Sign in, go to the CMIP6 dataset page, and accept the licence in the
+   download form. Separate from the ERA5 licence.
+3. Click your name (top right) and copy your **Personal Access Token**.
+4. Create `~/.cdsapirc` (on Windows: `C:\Users\<you>\.cdsapirc`) with:
+   ```
+   url: https://cds.climate.copernicus.eu/api
+   key: YOUR_TOKEN
+   ```
+   If you already have this file from another CDS dataset, skip this step.
+5. `pip install cdsapi xarray netcdf4`
+6. Run `python scripts/cmip6_download.py`
 
 The default pulls one model (MPI-ESM1-2-LR), one scenario (SSP5-8.5),
 monthly `near_surface_air_temperature` over a UK bounding box for 2050.

@@ -88,13 +88,20 @@ standard gravitational acceleration (9.80665 m s-2): `z_in_metres = z / 9.80665`
 ## Get data in 5 minutes
 
 1. Register for a free CDS account at https://cds.climate.copernicus.eu/
-2. Accept the ERA5 pressure-levels licence in your CDS profile (this is a
-   separate licence acceptance from the single-levels dataset).
-3. Create `~/.cdsapirc` with your Personal Access Token. See the
-   [ERA5 single levels docs](../era5-single-levels/README.md#get-data-in-5-minutes)
-   for the exact format and Windows-specific creation steps.
-4. `pip install cdsapi xarray netcdf4`
-5. Run `python scripts/era5_pressure_levels_download.py`
+2. Sign in, go to the ERA5 pressure-levels dataset page, and accept the
+   licence in the download form. This is a separate acceptance from the
+   single-levels dataset.
+3. Click your name (top right) and copy your **Personal Access Token**.
+4. Create `~/.cdsapirc` (on Windows: `C:\Users\<you>\.cdsapirc`) with:
+   ```
+   url: https://cds.climate.copernicus.eu/api
+   key: YOUR_TOKEN
+   ```
+   If you already have this file from another CDS dataset, skip this step.
+   See [ERA5 single levels docs](../era5-single-levels/README.md) for
+   Windows-specific file creation tips.
+5. `pip install cdsapi xarray netcdf4`
+6. Run `python scripts/era5_pressure_levels_download.py`
 
 The default config pulls one hour of 500 hPa temperature over the UK as a
 minimal test.

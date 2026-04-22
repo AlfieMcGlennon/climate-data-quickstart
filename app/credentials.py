@@ -136,17 +136,40 @@ def check_ceda() -> CredentialStatus:
     )
 
 
+def _ewdsapirc_exists() -> bool:
+    """Check if ~/.ewdsapirc (or ~/_ewdsapirc) exists with a key."""
+    for name in (".ewdsapirc", "_ewdsapirc"):
+        path = Path.home() / name
+        if path.exists():
+            try:
+                content = path.read_text(encoding="utf-8", errors="ignore")
+                if "key:" in content:
+                    return True
+            except OSError:
+                continue
+    return False
+
+
 def check_ewds() -> CredentialStatus:
-    """Check Copernicus CEMS EWDS credentials (EWDS_KEY env var)."""
+    """Check Copernicus CEMS EWDS credentials (~/.ewdsapirc or env var)."""
+    via_env = bool(os.environ.get("EWDS_KEY"))
+    via_file = _ewdsapirc_exists()
     return CredentialStatus(
-        configured=bool(os.environ.get("EWDS_KEY")),
-        location="EWDS_KEY environment variable",
+        configured=via_env or via_file,
+        location=(
+            "EWDS_KEY env var" if via_env
+            else "~/.ewdsapirc" if via_file
+            else "not configured"
+        ),
         registration_url="https://ewds.climate.copernicus.eu/",
         instructions=(
             "Register at the URL above (separate account from the main CDS), "
             "accept the GloFAS licence, copy your Personal Access Token, "
-            "and export it:\n"
-            "  export EWDS_KEY=<your-token>"
+            "then save it to ~/.ewdsapirc:\n"
+            "  url: https://ewds.climate.copernicus.eu/api\n"
+            "  key: YOUR_TOKEN\n\n"
+            "Or set the EWDS_KEY environment variable:\n"
+            "  export EWDS_KEY=YOUR_TOKEN"
         ),
     )
 

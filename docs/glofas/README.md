@@ -63,16 +63,53 @@ URL and key explicitly.
 
 ## Get data in 5 minutes
 
-1. Register at https://ewds.climate.copernicus.eu/
-2. Accept the GloFAS dataset licence in your EWDS profile.
-3. Generate a Personal Access Token from your EWDS profile page.
-4. Set the token as an environment variable (recommended so it is not
-   committed to git):
-   ```bash
-   export EWDS_KEY="<your-ewds-token>"
-   ```
-5. `pip install cdsapi xarray netcdf4 cfgrib eccodes`
-6. Run `python scripts/glofas_download.py`
+### 1. Create an EWDS account
+
+Register at https://ewds.climate.copernicus.eu/ (free, separate from the
+main CDS). If you already have a CDS account, you still need a separate
+EWDS registration.
+
+### 2. Accept the GloFAS licence
+
+Sign in to EWDS, go to the
+[GloFAS historical dataset page](https://ewds.climate.copernicus.eu/datasets/cems-glofas-historical),
+scroll to the download form, and accept the licence terms. You only need
+to do this once.
+
+### 3. Copy your Personal Access Token
+
+Go to your EWDS profile page (click your name, top right). Your API key
+is shown there. Copy it.
+
+### 4. Save the key
+
+Create a file at `~/.ewdsapirc` (or `~/_ewdsapirc` on Windows if your
+system does not allow leading dots). Use the same format as `.cdsapirc`:
+
+```
+url: https://ewds.climate.copernicus.eu/api
+key: YOUR_EWDS_TOKEN
+```
+
+Do **not** put this in your `.cdsapirc` - that file is for the main CDS
+only. Having two `url:`/`key:` pairs in one file will break `cdsapi`.
+
+Alternatively, set an environment variable:
+
+```bash
+# Linux/macOS
+export EWDS_KEY="YOUR_EWDS_TOKEN"
+
+# Windows (current session)
+set EWDS_KEY=YOUR_EWDS_TOKEN
+```
+
+### 5. Install and run
+
+```bash
+pip install cdsapi xarray netcdf4 cfgrib eccodes
+python scripts/glofas_download.py
+```
 
 The default pulls one day of river discharge over a UK bounding box as a
 minimal test.

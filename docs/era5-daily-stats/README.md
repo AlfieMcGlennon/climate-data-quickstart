@@ -61,13 +61,17 @@ for the full list.
 ## Get data in 5 minutes
 
 1. Register for a free CDS account at https://cds.climate.copernicus.eu/
-2. Accept the licence for this dataset in your CDS profile (separate from
-   the main ERA5 licence).
-3. Create `~/.cdsapirc` with your Personal Access Token. See the
-   [ERA5 single levels docs](../era5-single-levels/README.md#get-data-in-5-minutes)
-   for format and Windows-specific steps.
-4. `pip install cdsapi xarray netcdf4`
-5. Run `python scripts/era5_daily_stats_download.py`
+2. Sign in, go to the ERA5 daily statistics dataset page, and accept the
+   licence in the download form. Separate from the main ERA5 licence.
+3. Click your name (top right) and copy your **Personal Access Token**.
+4. Create `~/.cdsapirc` (on Windows: `C:\Users\<you>\.cdsapirc`) with:
+   ```
+   url: https://cds.climate.copernicus.eu/api
+   key: YOUR_TOKEN
+   ```
+   If you already have this file from another CDS dataset, skip this step.
+5. `pip install cdsapi xarray netcdf4`
+6. Run `python scripts/era5_daily_stats_download.py`
 
 The default pulls three days of daily-mean 2 metre temperature over the
 UK.

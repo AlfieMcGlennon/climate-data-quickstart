@@ -7,8 +7,9 @@ Edit the USER CONFIGURATION block and run:
 The default pulls one day of river discharge over a UK bounding box.
 
 IMPORTANT: GloFAS is on the EWDS endpoint, not the main CDS. You need a
-separate EWDS account and Personal Access Token. Set ``EWDS_KEY`` as an
-environment variable before running.
+separate EWDS account and Personal Access Token. Save your key to
+``~/.ewdsapirc`` (same format as .cdsapirc but for EWDS) or set the
+``EWDS_KEY`` environment variable.
 
 Documentation: docs/glofas/README.md
 """
@@ -92,18 +93,11 @@ def download(
         Path to the downloaded file.
 
     Raises:
-        RuntimeError: If ``EWDS_KEY`` environment variable is not set.
+        RuntimeError: If no EWDS credentials are found.
     """
-    ewds_key = os.environ.get("EWDS_KEY")
-    if not ewds_key:
-        raise RuntimeError(
-            "EWDS_KEY environment variable not set.\n"
-            "GloFAS is on the Copernicus CEMS Early Warning Data Store (EWDS), "
-            "which is a separate platform from the main CDS.\n"
-            "Register at https://ewds.climate.copernicus.eu/, accept the "
-            "GloFAS licence, copy your Personal Access Token, and export it:\n"
-            "  export EWDS_KEY=<your-token>"
-        )
+    from common.credentials import check_ewds_key
+
+    ewds_key = check_ewds_key()
 
     import cdsapi
 

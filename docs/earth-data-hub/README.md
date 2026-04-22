@@ -67,14 +67,18 @@ on EDH.
 ## Get data in 5 minutes
 
 1. Register for a free account at https://platform.destine.eu/
-2. In the Earth Data Hub settings, create a **personal access token**.
-3. Store the token in `~/.netrc` so xarray picks it up automatically:
+2. Sign in to Earth Data Hub, go to your profile settings, and create a
+   **Personal Access Token**. Copy it.
+3. Add the token to your netrc file. On **Windows**, open
+   `C:\Users\<you>\_netrc` and add:
    ```
    machine data.earthdatahub.destine.eu
-     login your-destine-username
-     password YOUR_PERSONAL_ACCESS_TOKEN
+       login your-destine-username
+       password YOUR_PERSONAL_ACCESS_TOKEN
    ```
-   On Windows: `%USERPROFILE%\_netrc` (no leading dot on Windows).
+   On **Linux/macOS**, add the same block to `~/.netrc` and run
+   `chmod 600 ~/.netrc`. If you already have entries for other services
+   (e.g. NASA Earthdata), add this block below them.
 4. `pip install xarray zarr fsspec aiohttp netcdf4`
 5. Run `python scripts/earth_data_hub_download.py`
 

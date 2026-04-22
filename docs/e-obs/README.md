@@ -57,13 +57,18 @@ analysis, Met Office HadUK-Grid uses a denser UK station network.
 
 ## Get data in 5 minutes
 
-1. Register at https://cds.climate.copernicus.eu/
-2. Accept the E-OBS licence in your CDS profile.
-3. Create `~/.cdsapirc` with your Personal Access Token. See the
-   [ERA5 single levels docs](../era5-single-levels/README.md#get-data-in-5-minutes)
-   for the format.
-4. `pip install cdsapi xarray netcdf4`
-5. Run `python scripts/e_obs_download.py`
+1. Register for a free CDS account at https://cds.climate.copernicus.eu/
+2. Sign in, go to the E-OBS dataset page, and accept the licence in the
+   download form.
+3. Click your name (top right) and copy your **Personal Access Token**.
+4. Create `~/.cdsapirc` (on Windows: `C:\Users\<you>\.cdsapirc`) with:
+   ```
+   url: https://cds.climate.copernicus.eu/api
+   key: YOUR_TOKEN
+   ```
+   If you already have this file from another CDS dataset, skip this step.
+5. `pip install cdsapi xarray netcdf4`
+6. Run `python scripts/e_obs_download.py`
 
 The default pulls the ensemble-mean daily mean temperature at 0.1 degree
 resolution for the latest version. Files are large (~1 GB per variable
