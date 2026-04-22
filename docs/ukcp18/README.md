@@ -53,20 +53,54 @@ temperature, ensemble member 01) as a practical entry point.
 
 ## Get data in 5 minutes
 
-Requires a free [CEDA account](https://services.ceda.ac.uk/cedasite/register/info/).
+### 1. Create a CEDA account
 
-Set up your token (either method):
+Register at https://services.ceda.ac.uk/cedasite/register/info/ (free).
+You may need to apply for access to the UKCP18 dataset group after
+registration - CEDA will prompt you if so.
+
+### 2. Generate a bearer token
+
+CEDA uses short-lived bearer tokens (valid 3 days), not permanent API
+keys.
+
+**Option A (web):** Go to https://services.ceda.ac.uk/cedasite/mytokens/,
+sign in, and copy the generated token string.
+
+**Option B (command line):**
 
 ```bash
-# Option 1: environment variable
-export CEDA_TOKEN="your_bearer_token_here"
-
-# Option 2: save to file
-echo "your_bearer_token_here" > ~/.ceda_token
+curl -s -u "YOUR_CEDA_USERNAME:YOUR_CEDA_PASSWORD" \
+  -X POST https://services.ceda.ac.uk/api/token/create/ \
+  | python -c "import sys,json; print(json.load(sys.stdin)['access_token'])"
 ```
 
-Generate a token at the [CEDA token API](https://services.ceda.ac.uk/api/token/create/)
-or the [web token page](https://services.ceda.ac.uk/cedasite/mytokens/).
+### 3. Save the token
+
+On **Windows**, either:
+
+```powershell
+# Option 1: save to file
+echo YOUR_TOKEN_STRING > C:\Users\<you>\.ceda_token
+
+# Option 2: environment variable (current session only)
+set CEDA_TOKEN=YOUR_TOKEN_STRING
+```
+
+On **Linux/macOS**:
+
+```bash
+# Option 1: save to file
+echo "YOUR_TOKEN_STRING" > ~/.ceda_token && chmod 600 ~/.ceda_token
+
+# Option 2: environment variable
+export CEDA_TOKEN="YOUR_TOKEN_STRING"
+```
+
+The token expires after 3 days. Regenerate it before long download
+sessions.
+
+### 4. Download
 
 Then:
 

@@ -48,12 +48,43 @@ density at 2.5 arc-minute resolution is the typical starting point.
 
 ## Get data in 5 minutes
 
-Requires a free [NASA Earthdata account](https://urs.earthdata.nasa.gov/users/new).
-After registration, create a `~/.netrc` file (or `~/_netrc` on Windows):
+### 1. Create a NASA Earthdata account
+
+Register at https://urs.earthdata.nasa.gov/users/new (free).
+
+### 2. Authorise the SEDAC application
+
+SEDAC hosts GPWv4, but NASA requires you to explicitly approve it.
+This step is easy to miss because the download page does not mention it.
+
+1. Sign in at https://urs.earthdata.nasa.gov/profile
+2. Go to **Applications > Authorized Apps**
+3. Click **Approve More Applications**
+4. Search for **SEDAC** and click **Approve**
+
+Without this, downloads will fail with a 403 even if your credentials
+are correct.
+
+### 3. Add credentials to your netrc file
+
+NASA Earthdata does not use API keys or tokens. It uses your plain
+registration username and password, stored in a netrc file.
+
+On **Windows**, open (or create) `C:\Users\<you>\_netrc` and add:
 
 ```
-machine urs.earthdata.nasa.gov login YOUR_USERNAME password YOUR_PASSWORD
+machine urs.earthdata.nasa.gov
+    login YOUR_USERNAME
+    password YOUR_PASSWORD
 ```
+
+On **Linux/macOS**, add the same block to `~/.netrc` and run
+`chmod 600 ~/.netrc`.
+
+If you already have a `_netrc` file (e.g. for Earth Data Hub), add the
+block below the existing entries. Each `machine` block is independent.
+
+### 4. Download
 
 Then:
 
