@@ -49,7 +49,7 @@ a small request, click Download.
 
 ## Datasets
 
-17 datasets across five categories:
+19 datasets across five categories:
 
 | # | Dataset | Coverage | Access | Docs |
 |---|---------|----------|--------|------|
@@ -70,14 +70,17 @@ a small request, click Download.
 | 15 | CHIRPS | Satellite-station rainfall blend, tropics | Direct HTTP | [docs](docs/chirps/README.md) |
 | 16 | ECMWF Open Data | Real-time IFS/AIFS, four times daily | Direct HTTP | [docs](docs/ecmwf-open-data/README.md) |
 | 17 | GloFAS | Global river discharge reanalysis | EWDS API | [docs](docs/glofas/README.md) |
+| 18 | GPWv4 population | Global gridded population density, census-based | NASA Earthdata | [docs](docs/gpw-population/README.md) |
+| 19 | UKCP18 | UK climate projections, 12 km regional, to 2080 | CEDA | [docs](docs/ukcp18/README.md) |
 
 ## What the app does
 
-- **Download** any of the 17 datasets with a form instead of writing API calls
+- **Download** any of the 19 datasets with a form instead of writing API calls
 - **Stream** ERA5 and CMIP6 data lazily via Zarr (no queue, no file download)
 - **Explore** any NetCDF, GRIB, or CSV file with interactive maps and time series
 - **Compare** CMIP6 models side by side or plot ensemble member spread from ESGF
 - **Search** datasets by topic (temperature, wind, precipitation, flood, Europe, forecast)
+- **Learn** with interactive recipes: England's 350-year temperature record, global warming trends, colourmap and projection comparisons
 
 Everything runs locally. The app never reads or stores your API keys -
 it uses the same credential files as the command-line scripts
@@ -94,6 +97,8 @@ which are missing in the sidebar.
 | Copernicus CDS | ERA5 (all), CMIP6, E-OBS, C3S seasonal | [cds.climate.copernicus.eu](https://cds.climate.copernicus.eu/) | `~/.cdsapirc` |
 | Copernicus EWDS | GloFAS | [ewds.climate.copernicus.eu](https://ewds.climate.copernicus.eu/) | `EWDS_KEY` env var |
 | Earth Data Hub | EDH, EDH explorer | [platform.destine.eu](https://platform.destine.eu/) | `~/.netrc` |
+| NASA Earthdata | GPWv4 population | [urs.earthdata.nasa.gov](https://urs.earthdata.nasa.gov/) | `~/.netrc` |
+| CEDA | UKCP18 | [services.ceda.ac.uk](https://services.ceda.ac.uk/cedasite/register/info/) | `~/.ceda_token` or `CEDA_TOKEN` env var |
 | None needed | HadCET, HadCRUT5, GHCNd, CHIRPS, ARCO-ERA5, ECMWF Open Data, ESGF CMIP6 | - | - |
 
 Each dataset's docs page has step-by-step credential setup instructions.
