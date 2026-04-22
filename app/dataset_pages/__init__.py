@@ -25,6 +25,8 @@ from . import (
     arco_era5,
     edh_explorer,
     esgf_cmip6,
+    gpw_population,
+    ukcp18,
 )
 
 
@@ -49,6 +51,8 @@ DATASETS: dict[str, tuple[str, object]] = {
     "arco-era5": ("ARCO-ERA5", arco_era5),
     "edh-explorer": ("EDH catalogue explorer", edh_explorer),
     "esgf-cmip6": ("ESGF CMIP6 (full archive)", esgf_cmip6),
+    "gpw-population": ("GPWv4 population", gpw_population),
+    "ukcp18": ("UKCP18", ukcp18),
 }
 
 
@@ -122,6 +126,14 @@ DATASET_INFO: dict[str, str] = {
         "Full CMIP6 archive via ESGF. Every model, "
         "every experiment, every ensemble member."
     ),
+    "gpw-population": (
+        "Global gridded population density from census data. "
+        "Overlay on climate hazards to estimate exposed populations."
+    ),
+    "ukcp18": (
+        "UK climate projections at 12 km resolution. "
+        "Temperature, precipitation, wind under RCP8.5 to 2080."
+    ),
 }
 
 
@@ -138,11 +150,11 @@ CATEGORIES: dict[str, tuple[str, list[str]]] = {
     ),
     "Models": (
         ":material/timeline:",
-        ["cmip6", "esgf-cmip6", "c3s-seasonal"],
+        ["cmip6", "esgf-cmip6", "c3s-seasonal", "ukcp18"],
     ),
     "Observations": (
         ":material/thermostat:",
-        ["hadcet", "hadcrut5", "ghcnd", "e-obs", "chirps"],
+        ["hadcet", "hadcrut5", "ghcnd", "e-obs", "chirps", "gpw-population"],
     ),
     "Forecast": (
         ":material/water_drop:",

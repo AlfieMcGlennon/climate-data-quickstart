@@ -45,11 +45,11 @@ Two datasets remain deferred: UKCP18 (needs CEDA account) and GPWv4
 | 6 | hadcet | HadCET | Direct HTTP | shipped |
 | 7 | hadcrut5 | HadCRUT5 | Direct HTTP | shipped |
 | 8 | cmip6 | CMIP6 (CDS) | CDS API | shipped |
-| 9 | ukcp18 | UKCP18 | CEDA | deferred: CEDA account not registered |
+| 9 | ukcp18 | UKCP18 | CEDA | built: awaiting CEDA credentials for testing |
 | 10 | glofas | GloFAS historical | EWDS API | shipped |
 | 11 | ghcnd | GHCNd | Direct HTTP | shipped |
 | 12 | e-obs | E-OBS | CDS API | shipped |
-| 13 | gpw-population | GPWv4 | NASA Earthdata | deferred: Earthdata account not registered |
+| 13 | gpw-population | GPWv4 | NASA Earthdata | built: awaiting Earthdata credentials for testing |
 | 14 | chirps | CHIRPS | Direct HTTP | shipped |
 | 15 | arco-era5 | ARCO-ERA5 | Cloud Zarr (GCS) | shipped (v1.1) |
 | 16 | ecmwf-open-data | ECMWF Open Data | Direct HTTP | shipped (v1.1) |
@@ -136,4 +136,4 @@ Before a dataset is considered "done":
 - Editorial pass on docs (user's own voice, "when I reach for this" lines)
 - LinkedIn post framing: "built this for myself, sharing in case useful"
 - Consider a tutorial/walkthrough section in the app or docs
-- UKCP18 and GPWv4 when credentials are available
+- UKCP18 and GPWv4 artefacts built; run download tests once credentials are configured
