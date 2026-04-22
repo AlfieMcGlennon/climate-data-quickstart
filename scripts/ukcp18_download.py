@@ -30,7 +30,7 @@ RESOLUTION: str = "12km"
 ENSEMBLE_MEMBER: str = "01"
 FREQUENCY: str = "mon"
 VERSION: str = "v20190731"
-TIME_PERIOD: str = "19801201-20801130"
+TIME_PERIOD: str = "198012-208011"
 OUTPUT_DIR: str = "./data/ukcp18"
 # ==================================================================
 

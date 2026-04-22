@@ -31,10 +31,12 @@ def render_form() -> dict:
         ["ensemble_mean", "ensemble_spread", "ensemble_members"],
         help="'ensemble_members' returns up to 100 files.",
     )
-    grid_resolution = st.radio("Grid", ["0.1deg", "0.25deg"], horizontal=True)
+    grid_resolution = st.radio("Grid", ["0_1deg", "0_25deg"], horizontal=True,
+        format_func=lambda g: g.replace("_", "."),
+    )
     version = st.text_input(
-        "Version", "29.0e",
-        help="Pin a version for reproducible work. Check the CDS dataset page for the current release.",
+        "Version", "31_0e",
+        help="Use underscores not dots (e.g. 31_0e). Check the CDS dataset page for the current release.",
     )
 
     output_dir, output_filename = output_dir_input(SLUG)

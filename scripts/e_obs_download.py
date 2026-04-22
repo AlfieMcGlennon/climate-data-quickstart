@@ -35,12 +35,12 @@ VARIABLE: str = "mean_temperature"
 # `ensemble_members` (returns 100 files).
 PRODUCT_TYPE: str = "ensemble_mean"
 
-# Grid: "0.1deg" or "0.25deg".
-GRID_RESOLUTION: str = "0.1deg"
+# Grid: "0_1deg" or "0_25deg".
+GRID_RESOLUTION: str = "0_1deg"
 
 # Version. Pin in reproducible work. See CDS dataset page for current
-# available versions.
-VERSION: str = "29.0e"
+# available versions. Use underscores, not dots (e.g. "31_0e" not "31.0e").
+VERSION: str = "31_0e"
 
 # Period. "full_period" is the whole 1950-present archive in one file.
 PERIOD: str = "full_period"
@@ -68,8 +68,8 @@ def download(
         variable: CDS API variable name.
         product_type: ``ensemble_mean``, ``ensemble_spread``, or
             ``ensemble_members``.
-        grid_resolution: ``0.1deg`` or ``0.25deg``.
-        version: E-OBS version string, e.g. ``29.0e``.
+        grid_resolution: ``0_1deg`` or ``0_25deg``.
+        version: E-OBS version string, e.g. ``31_0e``.
         period: Always ``full_period`` (only option on CDS).
         output_dir: Directory to write to.
         output_filename: Final NetCDF filename.

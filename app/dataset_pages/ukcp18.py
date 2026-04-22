@@ -56,6 +56,6 @@ def render_form() -> dict:
         "ensemble_member": ensemble_member,
         "frequency": frequency,
         "version": "v20190731",
-        "time_period": "19801201-20801130",
+        "time_period": "198012-208011",
         "output_dir": output_dir,
     }
