@@ -24,6 +24,13 @@ from typing import Iterable
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from common.chunked import (  # noqa: E402
+    ChunkSpec,
+    ProgressCallback,
+    plan_chunks,
+    run_chunked_download,
+)
+
 
 # ==================================================================
 # USER CONFIGURATION - Edit these values for your use case
@@ -53,6 +60,11 @@ DOWNLOAD_FORMAT: str = "unarchived"
 
 OUTPUT_DIR: str = "./data/glofas"
 OUTPUT_FILENAME: str = "glofas_historical_test.grib"
+
+# Chunked download settings (used by download_chunked() only).
+CHUNK_BY: str = "year"       # "month" or "year"
+MAX_RETRIES: int = 3
+MERGE_OUTPUT: bool = True
 # ==================================================================
 
 
@@ -123,7 +135,91 @@ def download(
     return output_path
 
 
+def download_chunked(
+    system_version: str = SYSTEM_VERSION,
+    hydrological_model: str = HYDROLOGICAL_MODEL,
+    product_type: str = PRODUCT_TYPE,
+    variable: str = VARIABLE,
+    hyear: Iterable[str] = HYEAR,
+    hmonth: Iterable[str] = HMONTH,
+    hday: Iterable[str] = HDAY,
+    bbox: list[float] = BBOX,
+    data_format: str = DATA_FORMAT,
+    download_format: str = DOWNLOAD_FORMAT,
+    output_dir: str = OUTPUT_DIR,
+    output_filename: str = OUTPUT_FILENAME,
+    chunk_by: str = CHUNK_BY,
+    max_retries: int = MAX_RETRIES,
+    merge_output: bool = MERGE_OUTPUT,
+    progress_callback: ProgressCallback | None = None,
+) -> Path:
+    """Download GloFAS historical data in chunks with resume and retry.
+
+    Args:
+        system_version: GloFAS system version.
+        hydrological_model: Model name.
+        product_type: ``consolidated`` or ``intermediate``.
+        variable: GloFAS variable name.
+        hyear: Years as strings.
+        hmonth: Months as zero-padded strings.
+        hday: Days as zero-padded strings.
+        bbox: ``[north, west, south, east]`` in degrees.
+        data_format: ``grib2`` or ``netcdf``.
+        download_format: ``unarchived`` or ``zip``.
+        output_dir: Directory to write to.
+        output_filename: Final merged filename.
+        chunk_by: ``"month"`` or ``"year"``.
+        max_retries: Maximum attempts per chunk.
+        merge_output: Whether to merge chunks into one file.
+        progress_callback: Optional callback for progress reporting.
+
+    Returns:
+        Path to the merged file (if merge_output) or the output directory.
+    """
+    ext = ".grib" if data_format == "grib2" else ".nc"
+    template = "glofas_{year}_{month}" + ext
+
+    chunks = plan_chunks(
+        years=list(hyear),
+        months=list(hmonth),
+        chunk_by=chunk_by,
+        filename_template=template,
+    )
+
+    def _download_one(chunk: ChunkSpec) -> Path:
+        return download(
+            system_version=system_version,
+            hydrological_model=hydrological_model,
+            product_type=product_type,
+            variable=variable,
+            hyear=chunk.years,
+            hmonth=chunk.months,
+            hday=hday,
+            bbox=bbox,
+            data_format=data_format,
+            download_format=download_format,
+            output_dir=output_dir,
+            output_filename=chunk.filename,
+        )
+
+    return run_chunked_download(
+        download_one=_download_one,
+        chunks=chunks,
+        output_dir=output_dir,
+        dataset="glofas",
+        chunk_by=chunk_by,
+        max_retries=max_retries,
+        merge_output=merge_output,
+        merged_filename=output_filename,
+        data_format=data_format,
+        progress_callback=progress_callback,
+    )
+
+
 if __name__ == "__main__":
-    path = download()
+    if "--chunked" in sys.argv:
+        path = download_chunked()
+    else:
+        path = download()
     print(f"Downloaded: {path}")
     print(f"Size: {path.stat().st_size / 1e6:.2f} MB")

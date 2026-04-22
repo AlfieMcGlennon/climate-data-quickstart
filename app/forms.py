@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import streamlit as st
 
@@ -992,3 +992,62 @@ def _snippet_ensemble_stats(
     return "\n".join(lines)
 
 
+def chunked_download_options(
+    key_prefix: str = "chunk",
+    default_chunk_by: str = "month",
+    show_merge: bool = True,
+) -> dict[str, Any] | None:
+    """Render chunked download toggle and options.
+
+    Returns a dict with keys ``enabled``, ``chunk_by``, ``max_retries``,
+    ``merge_output`` when enabled, or None when disabled.
+    """
+    with st.expander("Chunked download (for large date ranges)"):
+        enabled = st.checkbox(
+            "Split into chunks",
+            value=False,
+            key=f"{key_prefix}_enabled",
+            help=(
+                "Downloads each month (or year) as a separate request. "
+                "Completed chunks are skipped on re-run; failed chunks "
+                "are retried automatically."
+            ),
+        )
+        if not enabled:
+            st.caption(
+                "Enable this for multi-month or multi-year pulls. Each "
+                "chunk downloads independently, so a failure does not "
+                "lose completed work."
+            )
+            return None
+
+        chunk_options = ["month", "year"]
+        default_idx = chunk_options.index(default_chunk_by)
+        chunk_by = st.radio(
+            "Chunk by",
+            chunk_options,
+            index=default_idx,
+            horizontal=True,
+            key=f"{key_prefix}_by",
+        )
+        max_retries = st.number_input(
+            "Max retries per chunk",
+            min_value=1,
+            max_value=10,
+            value=3,
+            key=f"{key_prefix}_retries",
+        )
+        merge_output = True
+        if show_merge:
+            merge_output = st.checkbox(
+                "Merge chunks into single file when done",
+                value=True,
+                key=f"{key_prefix}_merge",
+            )
+
+    return {
+        "enabled": True,
+        "chunk_by": chunk_by,
+        "max_retries": max_retries,
+        "merge_output": merge_output,
+    }

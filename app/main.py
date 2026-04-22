@@ -33,7 +33,7 @@ from app.dataset_pages import (  # noqa: E402
 from app.dataset_pages import explore as explore_page  # noqa: E402
 from app.dataset_pages import learn as learn_page  # noqa: E402
 from app.forms import result_panel, streaming_preview_panel  # noqa: E402
-from app.runner import run  # noqa: E402
+from app.runner import run, run_chunked  # noqa: E402
 
 
 # Download-only datasets (exclude navigation pages)
@@ -390,8 +390,24 @@ def _stream_preview(slug: str, config: dict) -> None:
 
 def _run_download(slug: str, config: dict) -> None:
     """Invoke the download, store result path in session state."""
+    chunk_opts = config.get("chunked") or {}
+    is_chunked = chunk_opts.get("enabled", False)
+
     status = st.empty()
-    if slug == "earth-data-hub":
+    progress_bar = None
+    progress_text = None
+
+    if is_chunked:
+        status.info("Starting chunked download. Completed chunks are preserved on failure.")
+        progress_bar = st.progress(0.0)
+        progress_text = st.empty()
+
+        def _on_progress(chunk, chunk_status, completed, total):
+            progress_bar.progress(completed / total if total > 0 else 1.0)
+            state_label = "done" if chunk_status.state == "done" else chunk_status.state
+            progress_text.text(f"Chunk {completed}/{total}: {chunk.chunk_id} - {state_label}")
+
+    elif slug == "earth-data-hub":
         status.info(
             "Streaming sliced bytes from Earth Data Hub. Time scales with "
             "how much data you asked for, not with a queue."
@@ -408,9 +424,16 @@ def _run_download(slug: str, config: dict) -> None:
         )
 
     try:
-        output_path = run(slug, config)
+        if is_chunked:
+            output_path = run_chunked(slug, config, progress_callback=_on_progress)
+        else:
+            output_path = run(slug, config)
     except Exception as exc:
         status.empty()
+        if progress_bar:
+            progress_bar.empty()
+        if progress_text:
+            progress_text.empty()
         st.error(f"Download failed: {type(exc).__name__}: {exc}")
         with st.expander("Full traceback"):
             st.code(traceback.format_exc(), language="python")
@@ -418,6 +441,10 @@ def _run_download(slug: str, config: dict) -> None:
         return
 
     status.empty()
+    if progress_bar:
+        progress_bar.progress(1.0)
+    if progress_text:
+        progress_text.empty()
     st.session_state["last_result_path"] = str(output_path)
 
 

@@ -37,4 +37,39 @@ def run(slug: str, config: dict[str, Any]) -> Path:
     module_name = _module_for(slug)
     module = importlib.import_module(module_name)
     download_fn = getattr(module, "download")
-    return download_fn(**config)
+    clean = {k: v for k, v in config.items() if k != "chunked"}
+    return download_fn(**clean)
+
+
+def run_chunked(
+    slug: str,
+    config: dict[str, Any],
+    progress_callback: Any | None = None,
+) -> Path:
+    """Invoke the chunked download function for a dataset slug.
+
+    Falls back to run() if the dataset module has no download_chunked().
+
+    Args:
+        slug: Dataset slug.
+        config: Full config dict including chunked options.
+        progress_callback: Optional progress callback passed through.
+
+    Returns:
+        Path to the merged or output directory.
+    """
+    module_name = _module_for(slug)
+    module = importlib.import_module(module_name)
+
+    download_fn = getattr(module, "download_chunked", None)
+    if download_fn is None:
+        return run(slug, config)
+
+    chunk_config = config.get("chunked") or {}
+    clean = {k: v for k, v in config.items() if k != "chunked"}
+    clean["chunk_by"] = chunk_config.get("chunk_by", "month")
+    clean["max_retries"] = chunk_config.get("max_retries", 3)
+    clean["merge_output"] = chunk_config.get("merge_output", True)
+    clean["progress_callback"] = progress_callback
+
+    return download_fn(**clean)

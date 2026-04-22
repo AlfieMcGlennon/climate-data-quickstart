@@ -17,7 +17,7 @@ You need Python 3.10+ installed. That is the only prerequisite.
 **Windows:**
 
 ```
-git clone https://github.com/your-username/climate-data-quickstart.git
+git clone https://github.com/AlfieMcGlennon/climate-data-quickstart.git
 cd climate-data-quickstart
 setup.bat
 ```
@@ -25,7 +25,7 @@ setup.bat
 **macOS / Linux:**
 
 ```bash
-git clone https://github.com/your-username/climate-data-quickstart.git
+git clone https://github.com/AlfieMcGlennon/climate-data-quickstart.git
 cd climate-data-quickstart
 chmod +x setup.sh && ./setup.sh
 ```
@@ -92,16 +92,14 @@ Some datasets are open (HadCET, CHIRPS, ARCO-ERA5, ESGF, ECMWF Open Data).
 The rest need a free API key. The app shows which credentials you have and
 which are missing in the sidebar.
 
-| Provider | Datasets | Where to register | Key file |
-|----------|----------|-------------------|----------|
-| Copernicus CDS | ERA5 (all), CMIP6, E-OBS, C3S seasonal | [cds.climate.copernicus.eu](https://cds.climate.copernicus.eu/) | `~/.cdsapirc` |
-| Copernicus EWDS | GloFAS | [ewds.climate.copernicus.eu](https://ewds.climate.copernicus.eu/) | `EWDS_KEY` env var |
-| Earth Data Hub | EDH, EDH explorer | [platform.destine.eu](https://platform.destine.eu/) | `~/.netrc` |
-| NASA Earthdata | GPWv4 population | [urs.earthdata.nasa.gov](https://urs.earthdata.nasa.gov/) | `~/.netrc` |
-| CEDA | UKCP18 | [services.ceda.ac.uk](https://services.ceda.ac.uk/cedasite/register/info/) | `~/.ceda_token` or `CEDA_TOKEN` env var |
-| None needed | HadCET, HadCRUT5, GHCNd, CHIRPS, ARCO-ERA5, ECMWF Open Data, ESGF CMIP6 | - | - |
-
-Each dataset's docs page has step-by-step credential setup instructions.
+| Provider | Datasets | Where to register | Key file | Setup guide |
+|----------|----------|-------------------|----------|-------------|
+| Copernicus CDS | ERA5 (all), CMIP6, E-OBS, C3S seasonal | [cds.climate.copernicus.eu](https://cds.climate.copernicus.eu/) | `~/.cdsapirc` | [CDS setup](docs/era5-single-levels/README.md#access) |
+| Copernicus EWDS | GloFAS | [ewds.climate.copernicus.eu](https://ewds.climate.copernicus.eu/) | `~/.ewdsapirc` | [EWDS setup](docs/glofas/README.md#get-data-in-5-minutes) |
+| Earth Data Hub | EDH, EDH explorer | [platform.destine.eu](https://platform.destine.eu/) | `~/.netrc` | [EDH setup](docs/earth-data-hub/README.md#get-data-in-5-minutes) |
+| NASA Earthdata | GPWv4 population | [urs.earthdata.nasa.gov](https://urs.earthdata.nasa.gov/) | `~/.netrc` | [Earthdata setup](docs/gpw-population/README.md#get-data-in-5-minutes) |
+| CEDA | UKCP18 | [services.ceda.ac.uk](https://services.ceda.ac.uk/cedasite/register/info/) | `~/.ceda_token` | [CEDA setup](docs/ukcp18/README.md#get-data-in-5-minutes) |
+| None needed | HadCET, HadCRUT5, GHCNd, CHIRPS, ARCO-ERA5, ECMWF Open Data, ESGF CMIP6 | - | - | - |
 
 ## Scripts only (no app)
 

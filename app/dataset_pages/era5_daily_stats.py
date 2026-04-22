@@ -6,6 +6,7 @@ import streamlit as st
 
 from app.forms import (
     bbox_input,
+    chunked_download_options,
     day_multiselect,
     month_multiselect,
     output_dir_input,
@@ -54,6 +55,7 @@ def render_form() -> dict:
     bbox = bbox_input(default_preset="UK (55, -8, 49, 2)")
 
     output_dir, output_filename = output_dir_input(SLUG)
+    chunk_opts = chunked_download_options(key_prefix="era5ds_chunk")
 
     return {
         "variables": variables,
@@ -66,4 +68,5 @@ def render_form() -> dict:
         "bbox": bbox.as_list(),
         "output_dir": output_dir,
         "output_filename": output_filename,
+        "chunked": chunk_opts,
     }

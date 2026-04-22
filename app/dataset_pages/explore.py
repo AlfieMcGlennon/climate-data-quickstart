@@ -215,32 +215,78 @@ def _gridded_quality(ds: xr.Dataset, path: Path) -> None:
     if "Spatial extent" in metrics:
         st.caption(f"Spatial extent: {metrics['Spatial extent']}")
 
-    # Full NaN check on first variable
+    # NaN check on first variable (sampled for large datasets)
     if data_vars:
         var = data_vars[0]
         da = ds[var]
         total = int(np.prod(da.shape))
-        values = da.values
-        nan_count = int(np.isnan(values).sum())
-        completeness = (1 - nan_count / total) * 100
-        st.caption(
-            f"Completeness of `{var}`: {completeness:.1f}% "
-            f"({nan_count:,} NaN out of {total:,} values)"
-        )
+        nbytes_est = total * 4  # float32 estimate
+        max_bytes = 500 * 1024 * 1024  # 500 MB threshold
+
+        sampled = False
+        if nbytes_est > max_bytes and time_dim and time_dim in da.dims:
+            sample_steps = max(1, int(max_bytes / (nbytes_est / da.sizes[time_dim])))
+            da_sample = da.isel({time_dim: slice(0, sample_steps)})
+            sample_total = int(np.prod(da_sample.shape))
+            values = da_sample.values
+            nan_count = int(np.isnan(values).sum())
+            completeness = (1 - nan_count / sample_total) * 100
+            sampled = True
+            st.caption(
+                f"Completeness of `{var}` (sampled, first {sample_steps} "
+                f"of {da.sizes[time_dim]:,} time steps): {completeness:.1f}% "
+                f"({nan_count:,} NaN out of {sample_total:,} values)"
+            )
+            st.info(
+                f"Full dataset is ~{nbytes_est / 1e9:.1f} GB in memory. "
+                f"Showing a preview of the first {sample_steps} time steps. "
+                f"See the code snippet below for how to check the full file."
+            )
+        else:
+            values = da.values
+            nan_count = int(np.isnan(values).sum())
+            completeness = (1 - nan_count / total) * 100
+            st.caption(
+                f"Completeness of `{var}`: {completeness:.1f}% "
+                f"({nan_count:,} NaN out of {total:,} values)"
+            )
 
     # Code
+    var_name = data_vars[0] if data_vars else "var"
     with st.expander(":material/code: Code for data quality checks"):
-        st.code(
-            "import xarray as xr\n"
-            "import numpy as np\n\n"
-            f'ds = xr.open_dataset("{path}")\n\n'
-            "# Overview\n"
-            "print(ds)\n\n"
-            "# Check for missing data\n"
-            f'da = ds["{data_vars[0] if data_vars else "var"}"]\n'
-            "total = np.prod(da.shape)\n"
-            "nans = np.isnan(da.values).sum()\n"
-            'print(f"Completeness: {(1 - nans/total)*100:.1f}%")\n'
-            'print(f"NaN count: {nans:,} / {total:,}")',
-            language="python",
-        )
+        code_lines = [
+            "import xarray as xr",
+            "import numpy as np",
+            "",
+            f'ds = xr.open_dataset("{path}")',
+            "",
+            "# Overview",
+            "print(ds)",
+            "",
+            "# Check for missing data",
+            f'da = ds["{var_name}"]',
+        ]
+        if data_vars and nbytes_est > max_bytes:
+            code_lines += [
+                "",
+                "# Large file - iterate over time slices to avoid memory errors",
+                "nan_count = 0",
+                "total = 0",
+                f"n_steps = da.sizes['{time_dim}']",
+                "batch = 100",
+                "for start in range(0, n_steps, batch):",
+                f"    chunk = da.isel({time_dim}=slice(start, start + batch)).values",
+                "    nan_count += int(np.isnan(chunk).sum())",
+                "    total += chunk.size",
+                "    print(f\"  {min(start + batch, n_steps)}/{n_steps}\", end=\"\\r\")",
+                'print(f"\\nCompleteness: {(1 - nan_count/total)*100:.1f}%")',
+                'print(f"NaN count: {nan_count:,} / {total:,}")',
+            ]
+        else:
+            code_lines += [
+                "total = np.prod(da.shape)",
+                "nans = np.isnan(da.values).sum()",
+                'print(f"Completeness: {(1 - nans/total)*100:.1f}%")',
+                'print(f"NaN count: {nans:,} / {total:,}")',
+            ]
+        st.code("\n".join(code_lines), language="python")

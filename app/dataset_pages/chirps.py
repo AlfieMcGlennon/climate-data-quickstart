@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.forms import output_dir_input
+from app.forms import chunked_download_options, output_dir_input
 
 SLUG = "chirps"
 
@@ -29,10 +29,14 @@ def render_form() -> dict:
     # CHIRPS uses its own filename scheme by default
     if output_filename.endswith("_download.nc"):
         output_filename = f"chirps-v2.0.{int(year)}.days_{grid}.nc"
+    chunk_opts = chunked_download_options(
+        key_prefix="chirps_chunk", default_chunk_by="year",
+    )
 
     return {
         "year": int(year),
         "grid": grid,
         "output_dir": output_dir,
         "output_filename": output_filename,
+        "chunked": chunk_opts,
     }

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.forms import bbox_input, output_dir_input
+from app.forms import bbox_input, chunked_download_options, output_dir_input
 
 
 SLUG = "glofas"
@@ -50,6 +50,9 @@ def render_form() -> dict:
     output_dir, output_filename = output_dir_input(SLUG)
     if data_format == "grib2" and not output_filename.endswith(".grib"):
         output_filename = output_filename.rsplit(".", 1)[0] + ".grib"
+    chunk_opts = chunked_download_options(
+        key_prefix="glofas_chunk", default_chunk_by="year",
+    )
 
     return {
         "system_version": system_version,
@@ -64,4 +67,5 @@ def render_form() -> dict:
         "download_format": "unarchived",
         "output_dir": output_dir,
         "output_filename": output_filename,
+        "chunked": chunk_opts,
     }

@@ -96,6 +96,8 @@ short name (`tas`), not the CDS request string.
    key: YOUR_TOKEN
    ```
    If you already have this file from another CDS dataset, skip this step.
+   See the [ERA5 single levels setup guide](../era5-single-levels/README.md#access)
+   for detailed instructions including Windows file creation tips.
 5. `pip install cdsapi xarray netcdf4`
 6. Run `python scripts/cmip6_download.py`
 

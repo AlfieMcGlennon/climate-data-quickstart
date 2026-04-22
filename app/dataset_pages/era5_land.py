@@ -6,6 +6,7 @@ import streamlit as st
 
 from app.forms import (
     bbox_input,
+    chunked_download_options,
     day_multiselect,
     hour_multiselect,
     month_multiselect,
@@ -53,6 +54,7 @@ def render_form() -> dict:
 
     data_format = st.radio("Format", ["netcdf", "grib"], horizontal=True)
     output_dir, output_filename = output_dir_input(SLUG)
+    chunk_opts = chunked_download_options(key_prefix="era5land_chunk")
 
     return {
         "variables": variables,
@@ -65,4 +67,5 @@ def render_form() -> dict:
         "download_format": "unarchived",
         "output_dir": output_dir,
         "output_filename": output_filename,
+        "chunked": chunk_opts,
     }
