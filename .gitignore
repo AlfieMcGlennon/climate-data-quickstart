@@ -94,6 +94,15 @@ output/
 .test_logs/
 .review/
 
+# Internal planning and dev docs (not customer-facing)
+# Root-anchored so dataset docs under docs/{slug}/ stay tracked.
+/CLAUDE.md
+/PLAN.md
+/SESSION_HANDOFF.md
+/CLIMATE_DATA_LEARN_PLAN.md
+/RECIPES_PLAN.md
+/implementation-architecture.md
+
 # Logs
 logs/
 *.log
