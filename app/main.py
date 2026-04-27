@@ -32,7 +32,7 @@ from app.dataset_pages import (  # noqa: E402
 )
 from app.dataset_pages import explore as explore_page  # noqa: E402
 from app.dataset_pages import learn as learn_page  # noqa: E402
-from app.forms import result_panel, streaming_preview_panel  # noqa: E402
+from app.forms import download_code_snippet, result_panel, streaming_preview_panel  # noqa: E402
 from app.runner import run, run_chunked  # noqa: E402
 
 
@@ -213,25 +213,36 @@ def main() -> None:
         config = module.render_form()
 
         if slug in ("earth-data-hub", "arco-era5", "edh-explorer"):
-            c1, c2, c3 = st.columns(3)
+            c1, c2, c3, c4 = st.columns(4)
             show_code = c1.form_submit_button(
-                ":material/code: Show code",
+                ":material/bolt: Show stream code",
                 use_container_width=True,
                 disabled=not ready,
             )
-            stream_preview = c2.form_submit_button(
+            show_download_code = c2.form_submit_button(
+                ":material/code: Show download code",
+                use_container_width=True,
+                disabled=not ready,
+            )
+            stream_preview = c3.form_submit_button(
                 ":material/visibility: Stream & preview",
                 use_container_width=True,
                 disabled=not ready,
             )
-            download = c3.form_submit_button(
+            download = c4.form_submit_button(
                 ":material/download: Download",
                 use_container_width=True,
                 disabled=not ready,
             )
             submitted = download
         else:
-            submitted = st.form_submit_button(
+            c1, c2 = st.columns(2)
+            show_download_code = c1.form_submit_button(
+                ":material/code: Show download code",
+                use_container_width=True,
+                disabled=not ready,
+            )
+            submitted = c2.form_submit_button(
                 ":material/download: Download",
                 disabled=not ready,
                 use_container_width=True,
@@ -248,6 +259,18 @@ def main() -> None:
             "Only the bytes you actually reduce or save flow over the network."
         )
         st.code(module.streaming_snippet(config), language="python")
+
+    # Download code snippet: a fully standalone Python script with the
+    # user's form values inlined. Runs anywhere with no dependency on this
+    # repo, so it can be copied to a fresh folder or shared as-is.
+    if show_download_code:
+        st.subheader("Download code snippet")
+        st.caption(
+            "Fully standalone Python. Save as `download.py` in any folder "
+            "and run with `python download.py`. No dependency on this repo, "
+            "so you can copy or send the code to anyone."
+        )
+        st.code(download_code_snippet(slug, config), language="python")
 
     # Stream & preview: open remote store, load subset, render explorer
     if _is_streaming and stream_preview:

@@ -992,6 +992,18 @@ def _snippet_ensemble_stats(
     return "\n".join(lines)
 
 
+def download_code_snippet(slug: str, config: dict[str, Any]) -> str:
+    """Build a fully standalone download snippet for the dataset + form config.
+
+    Returns valid Python the user can paste into an empty .py file or
+    notebook cell anywhere on disk - no dependency on this repo. See
+    ``app.standalone_script`` for the transformer.
+    """
+    from app.standalone_script import standalone_snippet
+
+    return standalone_snippet(slug, config)
+
+
 def chunked_download_options(
     key_prefix: str = "chunk",
     default_chunk_by: str = "month",
