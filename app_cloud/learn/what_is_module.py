@@ -33,7 +33,7 @@ def render_page() -> None:
         "| `cdsapi` | The Copernicus CDS API client. Turns a Python dict into an ERA5 / CMIP6 / E-OBS request. | https://cds.climate.copernicus.eu/how-to-api |"
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("`pip install`: the one-time setup")
     st.markdown(
@@ -63,10 +63,11 @@ def render_page() -> None:
         "# activate (Windows):\n"
         "  .venv\\Scripts\\activate\n"
         "```\n\n"
-        "Then run `pip install ...` inside the activated environment."
+        "Then run `pip install ...` inside the activated environment.",
+        icon=":material/lightbulb:",
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("`import` in your script")
     st.markdown(
@@ -93,7 +94,7 @@ def render_page() -> None:
         language="python",
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("If a notebook fails on the first cell")
     st.markdown(
@@ -108,7 +109,7 @@ def render_page() -> None:
         "command in your terminal, not in Python)."
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("Where to go next")
     st.markdown(

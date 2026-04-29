@@ -57,7 +57,7 @@ def render_page() -> None:
             "On Fedora: `sudo dnf install python3 python3-pip`."
         )
 
-    st.divider()
+    st.space("medium")
 
     st.header("Jupyter in one paragraph")
     st.markdown(
@@ -92,10 +92,11 @@ def render_page() -> None:
         "*File > Upload notebook*, and drop in the `.ipynb` you downloaded "
         "from this app. Colab runs Python in the cloud - no local install. "
         "Most cells will work directly. Cells that need a Copernicus key "
-        "(CDS) won't run on Colab unless you set up your key there too."
+        "(CDS) won't run on Colab unless you set up your key there too.",
+        icon=":material/lightbulb:",
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("How a notebook looks once it runs")
     st.markdown(
@@ -117,7 +118,7 @@ def render_page() -> None:
         "directly under the cell. No console, no separate window."
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("Where to go next")
     st.markdown(

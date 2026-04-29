@@ -60,7 +60,7 @@ def render_page() -> None:
         "as a NetCDF file."
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("Why APIs need a key")
     st.markdown(
@@ -78,7 +78,7 @@ def render_page() -> None:
         "it from there."
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("Setting up a CDS key (the most common case)")
     st.markdown(
@@ -97,10 +97,11 @@ def render_page() -> None:
         "If a script gives you a `403` or 'licence not accepted' error, "
         "it's almost always because step 5 was skipped for that specific "
         "dataset. Open the dataset page on the CDS site, scroll down, and "
-        "tick the licence box."
+        "tick the licence box.",
+        icon=":material/check_circle:",
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("APIs that don't need a key")
     st.markdown(
@@ -117,7 +118,7 @@ def render_page() -> None:
         "notebook** mode."
     )
 
-    st.divider()
+    st.space("medium")
 
     st.header("Where to go next")
     st.markdown(
