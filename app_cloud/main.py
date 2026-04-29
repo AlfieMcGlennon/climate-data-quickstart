@@ -1,8 +1,13 @@
-"""Streamlit entry point for the cloud-hosted education-first variant.
+"""Streamlit entry point for the hosted researcher preview.
 
 Launch with::
 
     streamlit run app_cloud/main.py
+
+Audience: Python-fluent researchers and analysts who want to skip the
+``cdsapi`` boilerplate and grab a runnable notebook or script. Educational
+scaffolding for absolute beginners is out of scope here and lives in a
+separate repo.
 
 Imports from ``app/`` are read-only. The desktop app at ``app/main.py``
 is the canonical local experience and is never edited from here.
@@ -29,7 +34,7 @@ from app.dataset_pages import (  # noqa: E402
 from app.dataset_pages import learn as recipes_page  # noqa: E402
 from app_cloud import gating  # noqa: E402
 from app_cloud.code_annotator import annotate as _annotate  # noqa: E402
-from app_cloud.learn import PAGES as LEARN_PAGES  # noqa: E402
+from app_cloud.licences import licence_for  # noqa: E402
 from app_cloud.nav import render_sidebar  # noqa: E402
 from app_cloud.notebook_builder import (  # noqa: E402
     PLOT_LABELS,
@@ -50,11 +55,6 @@ _DOWNLOAD_DATASETS = {k: v for k, v in DATASETS.items() if k != "home"}
 # in absolute terms but it adds visible jank when the user is toggling
 # pills. Caching by (slug, config_json, plot_choices) collapses the
 # common rerun path to a dict lookup.
-#
-# Lists/dicts in `config` aren't directly hashable for st.cache_data, so
-# we serialise to canonical JSON at the call boundary. ``sort_keys`` is
-# critical: dict iteration order would otherwise produce different cache
-# keys for the same logical config.
 
 
 @st.cache_data(show_spinner=False)
@@ -95,106 +95,21 @@ def _config_key(config: dict[str, Any]) -> str:
 
 def main() -> None:
     st.set_page_config(
-        page_title="Climate data quickstart - learn",
+        page_title="Climate data quickstart - hosted preview",
         page_icon=":material/cloud_download:",
         layout="wide",
     )
 
     mode = render_sidebar()
 
-    if mode == "learn":
-        _render_learn_landing()
-    elif mode == "recipes":
+    if mode == "recipes":
         recipes_page.render_page()
     elif mode == "build":
         _render_build()
     elif mode == "datasets":
         _render_datasets_browser()
     else:
-        _render_learn_landing()
-
-
-# ── Learn landing ────────────────────────────────────────────────────
-
-
-_LEARN_DESCRIPTIONS: dict[str, str] = {
-    "what-is-python-jupyter": (
-        "Python is the language. Jupyter is the notebook format. How to "
-        "install both and open a `.ipynb` file."
-    ),
-    "what-is-module": (
-        "Why every script starts with `import xarray as xr` and what you "
-        "have to do once before that line works."
-    ),
-    "what-is-api": (
-        "What an API call to the Copernicus CDS actually looks like, why "
-        "it needs a key, and how to set one up."
-    ),
-}
-
-
-_LEARN_ICONS: dict[str, str] = {
-    "what-is-python-jupyter": "code",
-    "what-is-module": "extension",
-    "what-is-api": "vpn_key",
-}
-
-
-def _render_learn_landing() -> None:
-    """Top-level Learn page: cards linking to the educational sub-pages."""
-    selected = st.session_state.get("cloud_learn_page")
-    if selected and selected in LEARN_PAGES:
-        if st.button(
-            ":material/arrow_back: Back to Learn",
-            key="learn_back",
-            type="tertiary",
-        ):
-            st.session_state["cloud_learn_page"] = None
-            st.rerun()
-        _, module = LEARN_PAGES[selected]
-        module.render_page()
-        return
-
-    st.title(":material/school: Learn")
-    st.caption(
-        "Plain-English answers to the questions that come up the first "
-        "time you try to use a climate dataset. No prior coding "
-        "knowledge assumed."
-    )
-
-    for key, (label, _module) in LEARN_PAGES.items():
-        icon = _LEARN_ICONS.get(key, "menu_book")
-        with st.container(border=True):
-            c_icon, c_text, c_action = st.columns([1, 6, 2], vertical_alignment="center")
-            with c_icon:
-                st.markdown(
-                    f"## :material/{icon}:",
-                    unsafe_allow_html=False,
-                )
-            with c_text:
-                st.markdown(f"**{label}**")
-                st.caption(_LEARN_DESCRIPTIONS.get(key, ""))
-            with c_action:
-                st.button(
-                    "Open",
-                    icon=":material/arrow_forward:",
-                    key=f"learn_open_{key}",
-                    use_container_width=True,
-                    type="primary",
-                    on_click=_select_learn_page,
-                    args=(key,),
-                )
-
-    st.caption(
-        "Once you have read these, head to **Recipes** for hands-on "
-        "walkthroughs that load real data and plot it, or **Build a "
-        "notebook** to generate a `.ipynb` for a dataset and plot type "
-        "of your choosing."
-    )
-
-
-def _select_learn_page(key: str) -> None:
-    st.session_state["cloud_learn_page"] = key
+        recipes_page.render_page()
 
 
 # ── Build a notebook ─────────────────────────────────────────────────
@@ -206,7 +121,7 @@ def _render_build() -> None:
         "Pick a dataset, configure the request, choose the plots you "
         "want. The app gives you a Jupyter notebook (`.ipynb`) and a "
         "Python script (`.py`) - both fully self-contained, ready to "
-        "run on your own machine."
+        "run on your own machine with your own API keys."
     )
 
     # Step 1: dataset
@@ -221,7 +136,7 @@ def _render_build() -> None:
             st.caption(
                 ":material/key: This dataset needs your own API key to "
                 "download live. The notebook will still be generated; "
-                "see the **Learn > What is an API?** page for setup."
+                "configure your key locally before running it."
             )
 
     # Step 2: configure the request
@@ -324,9 +239,10 @@ def _render_dataset_picker() -> str:
 def _render_datasets_browser() -> None:
     st.title(":material/dataset: Browse datasets")
     st.caption(
-        "All 19 datasets in the toolkit. Open-access datasets work in any "
-        "build of this app; credentialed datasets show the live download "
-        "code so you can run it locally with your own key."
+        "All 19 datasets in the toolkit. Open-access datasets work in "
+        "any deployment of this app; credentialed datasets show the live "
+        "download code so you can run it locally with your own key. "
+        "Each card lists the data licence."
     )
 
     open_count = sum(1 for s in _DOWNLOAD_DATASETS if gating.is_open_access(s))
@@ -341,6 +257,7 @@ def _render_datasets_browser() -> None:
         cols = st.columns(2)
         for i, slug in enumerate(slugs):
             name = _DOWNLOAD_DATASETS[slug][0]
+            licence_label, licence_url = licence_for(slug)
             with cols[i % 2]:
                 with st.container(border=True):
                     title_col, badge_col = st.columns([3, 1])
@@ -360,6 +277,11 @@ def _render_datasets_browser() -> None:
                                 color="orange",
                             )
                     st.caption(DATASET_INFO.get(slug, ""))
+                    licence_md = (
+                        f":material/balance: Licence: [{licence_label}]({licence_url})"
+                        if licence_url else f":material/balance: Licence: {licence_label}"
+                    )
+                    st.caption(licence_md)
                     st.caption(f":material/menu_book: `docs/{slug}/README.md`")
 
 

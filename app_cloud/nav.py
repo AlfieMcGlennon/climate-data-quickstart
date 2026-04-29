@@ -15,7 +15,6 @@ class NavItem:
 
 
 NAV_ITEMS: tuple[NavItem, ...] = (
-    NavItem("learn", "Learn", "school"),
     NavItem("recipes", "Recipes", "menu_book"),
     NavItem("build", "Build a notebook", "auto_stories"),
     NavItem("datasets", "Browse datasets", "dataset"),
@@ -33,8 +32,8 @@ def render_sidebar() -> str:
 
     if "cloud_mode" not in st.session_state:
         valid = {item.key for item in NAV_ITEMS}
-        url_mode = st.query_params.get("mode", "learn")
-        st.session_state["cloud_mode"] = url_mode if url_mode in valid else "learn"
+        url_mode = st.query_params.get("mode", "recipes")
+        st.session_state["cloud_mode"] = url_mode if url_mode in valid else "recipes"
 
     current = st.session_state["cloud_mode"]
     st.query_params["mode"] = current
