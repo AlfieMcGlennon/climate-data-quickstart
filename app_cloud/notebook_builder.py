@@ -80,8 +80,37 @@ def build_notebook(
     """
     nb = nbf.v4.new_notebook()
     nb["metadata"] = _notebook_metadata()
-    cells: list[Any] = []
+    nb["cells"] = _notebook_cells(slug, config, plot_choices, dataset_name, dataset_info)
+    return nbf.writes(nb).encode("utf-8")
 
+
+def notebook_preview(
+    slug: str,
+    config: dict[str, Any],
+    plot_choices: list[str],
+    dataset_name: str,
+    dataset_info: str = "",
+) -> list[dict[str, str]]:
+    """Return cells as plain dicts so the app can render an inline preview.
+
+    Each entry: ``{"kind": "markdown"|"code", "source": str}``.
+    """
+    cells = _notebook_cells(slug, config, plot_choices, dataset_name, dataset_info)
+    return [
+        {"kind": cell["cell_type"], "source": cell["source"]}
+        for cell in cells
+    ]
+
+
+def _notebook_cells(
+    slug: str,
+    config: dict[str, Any],
+    plot_choices: list[str],
+    dataset_name: str,
+    dataset_info: str,
+) -> list[Any]:
+    """Build the ordered nbformat cell list shared by the bytes and preview paths."""
+    cells: list[Any] = []
     cells.append(nbf.v4.new_markdown_cell(_intro_md(dataset_name, dataset_info)))
     cells.append(nbf.v4.new_markdown_cell(_download_intro_md()))
     cells.append(nbf.v4.new_code_cell(annotate(slug, config)))
@@ -94,8 +123,7 @@ def build_notebook(
         cells.append(nbf.v4.new_code_cell(cell_code))
 
     cells.append(nbf.v4.new_markdown_cell(_footer_md(slug, dataset_name)))
-    nb["cells"] = cells
-    return nbf.writes(nb).encode("utf-8")
+    return cells
 
 
 def build_script(
@@ -241,10 +269,12 @@ def _output_path(config: dict[str, Any]) -> str:
     """Construct the path the download cell will write to.
 
     Returned with forward slashes for cross-platform readability in the
-    notebook source.
+    notebook source. ``None`` filenames (e.g. ESGF, where the canonical
+    filename is auto-derived from the search result) fall back to a
+    generic placeholder the user can edit.
     """
-    out_dir = config.get("output_dir", "./data")
-    out_name = config.get("output_filename", "output.nc")
+    out_dir = config.get("output_dir") or "./data"
+    out_name = config.get("output_filename") or "output.nc"
     return str(PurePosixPath(out_dir) / out_name)
 
 

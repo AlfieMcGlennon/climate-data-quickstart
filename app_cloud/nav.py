@@ -25,9 +25,9 @@ def render_sidebar() -> str:
     """Render the cloud-app sidebar and return the active mode key."""
     st.sidebar.markdown("## :material/cloud_download: Climate data quickstart")
     st.sidebar.caption(
-        "Open data + open code. No credentials needed to learn the basics; "
-        "the live download code is shown so you can run it locally with "
-        "your own keys."
+        "Configure a request, grab the code, run it in your own notebook. "
+        "Every snippet is fully self-contained: paste into any folder, "
+        "`python file.py`, done."
     )
 
     if "cloud_mode" not in st.session_state:
@@ -48,14 +48,27 @@ def render_sidebar() -> str:
             args=(item.key,),
         )
 
-    st.sidebar.divider()
+    with st.sidebar.expander(":material/help: How to use this", expanded=False):
+        st.markdown(
+            "1. **Browse datasets** to find what you need. Each card has a "
+            "**Show default code** button - copy it or download the "
+            "notebook directly.\n"
+            "2. **Build a notebook** to customise the request "
+            "(variables, dates, region) and pick plots before downloading.\n"
+            "3. **Recipes** runs three worked examples in the browser to "
+            "give you a feel for the kind of analysis these datasets "
+            "support."
+        )
+        st.markdown(
+            "**Credentials.** Open-access datasets (HadCET, HadCRUT5, "
+            "CHIRPS, ARCO-ERA5, ESGF, ECMWF Open Data) need none. "
+            "CDS, CEDA, EWDS, NASA Earthdata datasets need your own key - "
+            "set up locally and run the downloaded code there."
+        )
+
     st.sidebar.caption(
-        ":material/info: This is the **cloud demo**. For full live "
-        "downloads with your own API keys, run the desktop app locally - "
-        "see the repo for setup."
-    )
-    st.sidebar.caption(
-        "Repo: https://github.com/AlfieMcGlennon/climate-data-quickstart"
+        "[Repo](https://github.com/AlfieMcGlennon/climate-data-quickstart) "
+        "- MIT licensed"
     )
 
     return current
