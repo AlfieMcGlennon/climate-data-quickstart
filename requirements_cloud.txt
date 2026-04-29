@@ -1,0 +1,42 @@
+# Slimmer dependencies for the cloud-hosted education-first app.
+# Used by Streamlit Community Cloud when it builds the deployment.
+#
+# What is dropped vs the desktop requirements.txt:
+# - cfgrib / eccodes: GRIB reading is desktop-only (the cloud app shows the
+#   live download code but does not run GRIB-only datasets in the browser).
+# - jupyter / nbconvert: the cloud app generates .ipynb files for download
+#   but does not execute them; nbformat alone is enough.
+# - aiohttp: pulled in transitively by zarr/fsspec when needed.
+#
+# Pinned to be compatible with the latest stable streamlit (1.30+).
+
+# Streamlit
+streamlit>=1.30.0
+
+# Notebook assembly (no execution)
+nbformat>=5.9.0
+
+# Array and tabular data
+xarray>=2024.1.0
+netcdf4>=1.6.5
+numpy>=1.26.0
+pandas>=2.1.0
+
+# Plotting
+matplotlib>=3.8.0
+cartopy>=0.22.0
+nc-time-axis>=1.4.0
+
+# Streaming Zarr (ARCO-ERA5, EDH for the live recipes that use them)
+zarr>=2.16.0
+fsspec>=2024.1.0
+gcsfs>=2024.1.0
+
+# HTTP client for direct-download datasets and ESGF
+requests>=2.31.0
+
+# CDS API client (only used for code generation, never actually called in cloud)
+cdsapi>=0.7.0
+
+# ECMWF Open Data client (open access, runs in cloud)
+ecmwf-opendata>=0.3.0
